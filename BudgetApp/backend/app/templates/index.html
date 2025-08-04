@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Budget App</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <h1>Budget Tracker</h1>
+
+  <form method="POST" action="/add">
+    <input name="description" placeholder="Description" required>
+    <input name="amount" type="number" step="0.01" required>
+    <input name="category" placeholder="Category" required>
+    <select name="type">
+      <option value="income">Income</option>
+      <option value="expense">Expense</option>
+    </select>
+    <button type="submit">Add</button>
+  </form>
+<form action="/upload" method="POST" enctype="multipart/form-data">
+    <input type="file" name="file" accept=".csv" required>
+    <button type="submit">Upload CSV</button>
+</form>
+{% if records %}
+    <h3>CSV Contents:</h3>
+    <canvas id="myChart" width="400" height="150"></canvas>
+    <canvas id="myChartLine" width="400" height="150"></canvas>
+    <!-- render data into table -->
+    <table>
+  <tr>
+    <th>ID</th>
+    <th>Description</th>
+    <th>Amount</th>
+    <th>Category</th>
+    <th>Date</th>
+  </tr>
+  {% for expense in records %}
+  <tr>
+    <td>{{ expense.id }}</td>
+    <td>{{ expense.description }}</td>
+    <td>{{ expense.amount }}</td>
+    <td>{{ expense.category }}</td>
+    <td>{{ expense.date }}</td>
+  </tr>
+  {% endfor %}
+</table>
+
+  {% endif %}
+  
+<script>
+  // js for bar chart
+   const labels = JSON.parse('{{ labels|safe }}');
+    const data = JSON.parse('{{ amounts|safe }}');
+
+    const ctx = document.getElementById('myChart').getContext('2d');
+    const myChart = new Chart(ctx, {
+        type: 'bar',  // or 'line', 'pie', etc.
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Expenses by Category',
+                data: data,
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+
+    //js for line plot
+    const labels_line = JSON.parse('{{ labels_fil | safe }}');  // e.g., ["2025-07-01", "2025-07-28"]
+    const data_line = JSON.parse('{{ amounts_fil | safe }}');   // e.g., [800.0, 50.0]
+
+    const ctx2 = document.getElementById('myChartLine').getContext('2d');   //grab line plot element
+    const myChartLine = new Chart(ctx2, {
+        type: 'line',
+        data: {
+            labels: labels_line,
+            datasets: [{
+                label: 'Expenses Over Time',
+                data: data_line,
+                fill: false,
+                borderColor: 'rgba(255, 99, 132, 1)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Date'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Amount ($)'
+                    }
+                }
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
