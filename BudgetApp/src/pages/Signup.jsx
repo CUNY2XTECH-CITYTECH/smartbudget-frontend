@@ -1,15 +1,41 @@
 import { useState } from "react";
-import "./Login.css";
+import { useNavigate } from "react-router-dom";
+import "./Login.css"; // Reuse your login styles
 
 const SignupPage = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission logic (e.g., send data to an API)
-    alert(`Sign Up - Username: ${username}, Email: ${email}, Password: ${password}`);
+
+    try {
+      const response = await fetch("http://127.0.0.1:5000/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: username,
+          email: email,
+          password: password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("Signup successful! You can now log in.");
+        navigate("/login");
+      } else {
+        alert(data.message || "Signup failed.");
+      }
+    } catch (error) {
+      console.error("Signup error:", error);
+      alert("An error occurred during signup.");
+    }
   };
 
   return (
