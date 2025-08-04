@@ -80,3 +80,35 @@ def upload_csv():
 def view_expenses():
     expenses = Expense.query.all()
     return "<br>".join([f"{e.id} {e.description} {e.amount}" for e in expenses])
+
+# Signup
+@app.route('/signup', methods=['POST'])
+def signup():
+    data = request.get_json()
+    name = data.get('name')
+    password = data.get('password')
+
+    # Check if user already exists
+    existing_user = User.query.filter_by(name=name).first()
+    if existing_user:
+        return jsonify({"message": "Username already taken"}), 400
+
+    hashed_password = generate_password_hash(password)
+    new_user = User(name=name, password=hashed_password)
+    db.session.add(new_user)
+    db.session.commit()
+    return jsonify({"message": "User registered successfully"}), 201
+
+# Login
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    name = data.get('name')
+    password = data.get('password')
+
+    user = User.query.filter_by(name=name).first()
+
+    if user and check_password_hash(user.password, password):
+        return jsonify({"message": "Login successful", "userID": user.userID}), 200
+    else:
+        return jsonify({"message": "Invalid credentials"}), 401
