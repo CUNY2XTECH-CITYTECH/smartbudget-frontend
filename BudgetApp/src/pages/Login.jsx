@@ -10,23 +10,19 @@ function Login() {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/login", {
+      const response = await fetch("/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-          name: username,
-          password: password
-        })
+        credentials: "include", // this passes the cookie
+        body: JSON.stringify({ name: username, password: password })
       });
-
+      
       const data = await response.json();
 
       if (response.ok) {
         alert("Login successful!");
-        // Save token or user ID if returned
-        // Redirect to homepage
         navigate("/");
       } else {
         alert(data.message || "Login failed");
