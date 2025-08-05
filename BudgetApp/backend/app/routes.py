@@ -1,17 +1,19 @@
 from flask import Blueprint, request, jsonify, session
 from werkzeug.security import generate_password_hash, check_password_hash
-from .models import User, Expense
+from .models import User, Expense, Transaction, Budget, Stock, Thread, Comment
 from . import db
 from sqlalchemy import not_
 import pandas as pd
 from collections import defaultdict
+import os
+from flask import send_from_directory
 
 main_bp = Blueprint('main', __name__)
 
 # -------------------- Health Check --------------------
-@main_bp.route("/")
-def health_check():
-    return jsonify({"message": "API running"}), 200
+# @main_bp.route("/")
+# def health_check():
+#     return jsonify({"message": "API running"}), 200
 
 # -------------------- Signup --------------------
 @main_bp.route('/signup', methods=['POST'])
