@@ -7,6 +7,8 @@ import pandas as pd
 from collections import defaultdict
 import os
 from flask import send_from_directory
+import yfinance as yf
+from flask import request  # make sure this is imported 
 
 main_bp = Blueprint('main', __name__)
 
@@ -136,3 +138,40 @@ def daily_totals():
         "labels": sorted_dates,
         "amounts": values
     })
+
+#------stocks------
+
+@main_bp.route('/api/stock/<ticker>', methods=['GET'])
+def get_stock_data(ticker):
+    period = request.args.get('period', '1mo')       # default = 1 month
+    interval = request.args.get('interval', '1d')     # default = daily
+
+    if not ticker:
+        return jsonify({'error': 'Ticker is required'}), 400
+
+    try:
+        data = yf.download(ticker, period=period, interval=interval)
+        if data.empty:
+            return jsonify({'error': 'No data found'}), 404
+
+        history = [
+            {'date': date.strftime('%Y-%m-%d'), 'close': round(row['Close'], 2)}
+            for date, row in data.iterrows()
+        ]
+
+        close_prices = data['Close'].dropna()
+        stats = {
+            'min': round(float(close_prices.min()), 2),
+            'max': round(float(close_prices.max()), 2),
+            'average': round(float(close_prices.mean()), 2),
+            'std_dev': round(float(close_prices.std()), 2),
+            'latest': round(float(close_prices[-1]), 2)
+        }
+
+        return jsonify({
+            'ticker': ticker.upper(),
+            'history': history,
+            'stats': stats
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
