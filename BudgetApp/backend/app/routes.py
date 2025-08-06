@@ -141,37 +141,56 @@ def daily_totals():
 
 #------stocks------
 
-@main_bp.route('/api/stock/<ticker>', methods=['GET'])
-def get_stock_data(ticker):
-    period = request.args.get('period', '1mo')       # default = 1 month
-    interval = request.args.get('interval', '1d')     # default = daily
-
-    if not ticker:
-        return jsonify({'error': 'Ticker is required'}), 400
-
+@main_bp.route('/api/query', methods=['POST'])
+def query_yfinance():
     try:
-        data = yf.download(ticker, period=period, interval=interval)
-        if data.empty:
+        data = request.get_json()
+        print("Incoming data:", data)
+
+        ticker = data.get('ticker')
+        period = data.get('period')
+        interval = data.get('interval')
+
+        if not all([ticker, period, interval]):
+            return jsonify({'error': 'Missing required fields'}), 400
+
+        df = yf.download(ticker, period=period, interval=interval)
+        if df.empty:
             return jsonify({'error': 'No data found'}), 404
 
+        # Clean history for chart
         history = [
-            {'date': date.strftime('%Y-%m-%d'), 'close': round(row['Close'], 2)}
-            for date, row in data.iterrows()
+            {
+                'date': str(date.date()),  # convert Timestamp to string (YYYY-MM-DD)
+                'close': round(float(row['Close']), 2)
+            }
+            for date, row in df.iterrows()
+            if not pd.isna(row['Close'])  # avoid NaNs
         ]
 
-        close_prices = data['Close'].dropna()
+        # Get clean close prices (drop NaNs)
+        close_prices = df['Close'].dropna()
+
+        # Calculate stats with safe scalar conversions
         stats = {
-            'min': round(float(close_prices.min()), 2),
-            'max': round(float(close_prices.max()), 2),
-            'average': round(float(close_prices.mean()), 2),
-            'std_dev': round(float(close_prices.std()), 2),
-            'latest': round(float(close_prices[-1]), 2)
+            'min': round(close_prices.min().item(), 2),
+            'max': round(close_prices.max().item(), 2),
+            'average': round(close_prices.mean().item(), 2),
+            'std_dev': round(close_prices.std().item(), 2),
+            'latest': round(close_prices.iloc[-1].item(), 2)
         }
+        print("Returning data:", {
+            'ticker': ticker.upper(),
+            'history': history,
+            'stats': stats
+})
 
         return jsonify({
             'ticker': ticker.upper(),
             'history': history,
             'stats': stats
         })
+
     except Exception as e:
+        print("Error in /api/query:", e)
         return jsonify({'error': str(e)}), 500

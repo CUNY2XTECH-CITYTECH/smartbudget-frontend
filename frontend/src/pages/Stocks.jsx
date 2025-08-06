@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -13,10 +13,10 @@ import {
 ChartJS.register(CategoryScale, LinearScale, LineElement, PointElement, Tooltip, Legend);
 
 function Stocks() {
-  const [form, setForm] = useState({
-    ticker: '',
+  const [formData, setFormData] = useState({
     period: '1mo',
     interval: '1d',
+    ticker: ''
   });
 
   const [query, setQuery] = useState(null);
@@ -25,59 +25,53 @@ function Stocks() {
   const [error, setError] = useState(null);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (form.ticker.trim()) {
-      const formattedQuery = {
-        ...form,
-        ticker: form.ticker.trim().toUpperCase(),
-      };
-      setQuery(formattedQuery);
+    setError(null);
+    setChartData(null);
+    setStats(null);
+    setQuery(null);
+
+    try {
+      const response = await fetch('http://localhost:5000/api/query', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Unknown error occurred');
+        return;
+      }
+
+      setQuery({ ticker: data.ticker });
+      setStats(data.stats);
+
+      // Prepare chart data
+      setChartData({
+        labels: data.history.map(item => item.date),
+        datasets: [{
+          label: `${data.ticker} Closing Prices`,
+          data: data.history.map(item => item.close),
+          fill: false,
+          borderColor: 'rgba(75,192,192,1)',
+          tension: 0.1
+        }]
+      });
+
+    } catch (err) {
+      console.error(err);
+      setError('Network error or backend not running');
     }
   };
-
-  useEffect(() => {
-    if (!query) return;
-
-    const { ticker, period, interval } = query;
-
-    fetch(`http://localhost:5000/api/stock/${ticker}?period=${period}&interval=${interval}`)
-    .then(res => res.json())
-      .then(data => {
-        if (data.error) {
-          setError(data.error);
-          setChartData(null);
-          setStats(null);
-        } else {
-          const labels = data.history.map((point) => point.date);
-          const prices = data.history.map((point) => point.close);
-
-          setChartData({
-            labels,
-            datasets: [
-              {
-                label: `${data.ticker} Closing Price`,
-                data: prices,
-                fill: false,
-                borderColor: 'rgba(75,192,192,1)',
-                tension: 0.3,
-              },
-            ],
-          });
-
-          setStats(data.stats);
-          setError(null);
-        }
-      })
-      .catch((err) => {
-        setError("Network error. Please try again later.");
-        console.error(err);
-      });
-  }, [query]);
 
   return (
     <div className="stocks-page">
@@ -87,18 +81,18 @@ function Stocks() {
         <input
           name="ticker"
           placeholder="e.g. AAPL"
-          value={form.ticker}
+          value={formData.ticker}
           onChange={handleChange}
           required
         />
-        <select name="period" value={form.period} onChange={handleChange}>
+        <select name="period" value={formData.period} onChange={handleChange}>
           <option value="5d">5 Days</option>
           <option value="1mo">1 Month</option>
           <option value="3mo">3 Months</option>
           <option value="6mo">6 Months</option>
           <option value="1y">1 Year</option>
         </select>
-        <select name="interval" value={form.interval} onChange={handleChange}>
+        <select name="interval" value={formData.interval} onChange={handleChange}>
           <option value="1d">1 Day</option>
           <option value="1wk">1 Week</option>
           <option value="1mo">1 Month</option>
