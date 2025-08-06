@@ -91,7 +91,6 @@ function Forums() {
             </form>
           </div>
         )}
->>>>>>> d9c78bf70caf54003aa2e10c20434266e58db882
       </div>
     </div>
     <Footer />
