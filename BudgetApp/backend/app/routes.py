@@ -155,23 +155,33 @@ def query_yfinance():
             return jsonify({'error': 'Missing required fields'}), 400
 
         df = yf.download(ticker, period=period, interval=interval)
-        if df.empty:
-            return jsonify({'error': 'No data found'}), 404
 
-        # Clean history for chart
+# Flatten multi-level columns if they exist
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = df.columns.get_level_values(0)
+
+        print("Flattened DataFrame:\n", df.head())
+
+        if df.empty:
+            return jsonify({'error': 'No data found for given input'}), 404
+
+        if 'Close' not in df.columns:
+            return jsonify({'error': "'Close' column not found in data"}), 500
+
+        # Drop missing Close values
+        df = df.dropna(subset=['Close'])
+
+        # Build chart history
         history = [
             {
-                'date': str(date.date()),  # convert Timestamp to string (YYYY-MM-DD)
-                'close': round(float(row['Close']), 2)
+                'date': str(index.date()),
+                'close': round(float(close), 2)
             }
-            for date, row in df.iterrows()
-            if not pd.isna(row['Close'])  # avoid NaNs
+            for index, close in df['Close'].items()
         ]
 
-        # Get clean close prices (drop NaNs)
-        close_prices = df['Close'].dropna()
+        close_prices = df['Close']
 
-        # Calculate stats with safe scalar conversions
         stats = {
             'min': round(close_prices.min().item(), 2),
             'max': round(close_prices.max().item(), 2),
@@ -179,17 +189,14 @@ def query_yfinance():
             'std_dev': round(close_prices.std().item(), 2),
             'latest': round(close_prices.iloc[-1].item(), 2)
         }
-        print("Returning data:", {
-            'ticker': ticker.upper(),
-            'history': history,
-            'stats': stats
-})
 
-        return jsonify({
+        result = {
             'ticker': ticker.upper(),
             'history': history,
             'stats': stats
-        })
+        }
+
+        return jsonify(result)
 
     except Exception as e:
         print("Error in /api/query:", e)

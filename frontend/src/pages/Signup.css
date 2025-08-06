@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 /* Full-screen centered container */
+=======
+/* Make the container take full screen and center its contents */
+>>>>>>> d9c78bf70caf54003aa2e10c20434266e58db882
 .signup-container {
     display: flex;
     flex-direction: column;
@@ -13,92 +17,4 @@
     overflow: hidden;
     position: relative;
   }
-  
-  /* Optional top heading */
-  .signup-header {
-    font-weight: bold;
-    font-size: 2rem;
-    margin-top: 16px;
-    margin-bottom: 24px;
-    color: #333;
-    align-self: flex-start;
-    margin-left: 32px;
-  }
-  
-  /* Card-style signup form */
-  .signup-card {
-    background: #f6f1dc;
-    padding: 32px 40px;
-    border-radius: 32px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-width: 340px;
-    width: 100%;
-    max-width: 400px;
-  }
-  
-  /* Input field wrapper */
-  .input-group {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 24px;
-    width: 100%;
-  }
-  
-  /* Label styling */
-  .input-group label {
-    font-family: "Times New Roman", Times, serif;
-    font-size: 1.2rem;
-    margin-bottom: 4px;
-    color: #222;
-  }
-  
-  /* Input styling */
-  .input-group input {
-    border: none;
-    border-bottom: 2px solid #222;
-    background: transparent;
-    font-size: 1.1rem;
-    padding: 8px 0;
-    outline: none;
-    color: #000;
-  }
-  
-  /* Submit button */
-  .continue-btn {
-    background: #4b4783;
-    color: #fff;
-    border: none;
-    border-radius: 24px;
-    padding: 12px 0;
-    width: 100%;
-    font-size: 1.1rem;
-    margin-top: 8px;
-    cursor: pointer;
-  }
-  
-  /* Footer for legal or help links */
-  .signup-footer {
-    background: #f7b6b6;
-    color: #222;
-    width: 100%;
-    text-align: left;
-    padding: 12px 32px;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-  }
-  
-  /* Responsive tweaks */
-  @media (max-width: 600px) {
-    .signup-container {
-      padding: 20px;
-    }
-  
-    .signup-card {
-      padding: 24px 20px;
-    }
-  }
-  
+}

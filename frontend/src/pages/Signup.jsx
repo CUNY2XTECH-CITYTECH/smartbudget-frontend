@@ -1,17 +1,13 @@
-import "./Login.css"; 
+import "./Signup.css";
 import React, { useState } from "react";
-import "./Login.css"; // Reusing your existing login styles
 import { useNavigate } from "react-router-dom";
-
 const SignupPage = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       const response = await fetch("/signup", {
         method: "POST",
@@ -25,9 +21,7 @@ const SignupPage = () => {
           password: password,
         }),
       });
-
       const data = await response.json();
-
       if (response.ok) {
         alert("Signup successful! You can now log in.");
         navigate("/login");
@@ -39,11 +33,9 @@ const SignupPage = () => {
       alert("An error occurred during signup.");
     }
   };
-
   return (
     <div className="login-container">
       <header className="login-header">SmartBudget</header>
-
       <div className="login-card">
         <h2>Sign Up</h2>
         <form onSubmit={handleSubmit}>
@@ -58,7 +50,6 @@ const SignupPage = () => {
               onChange={(e) => setUsername(e.target.value)}
             />
           </div>
-
           <div className="input-group">
             <label htmlFor="email">Email Address</label>
             <input
@@ -70,7 +61,6 @@ const SignupPage = () => {
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
-
           <div className="input-group">
             <label htmlFor="password">Password</label>
             <input
@@ -83,18 +73,14 @@ const SignupPage = () => {
                // required
             />
           </div>
-
           <button type="submit" className="continue-btn">Sign Up</button>
         </form>
-
         <div className="guest-link">
           <span>Already have an account? <a href="/login">Log in</a></span>
         </div>
       </div>
-
       <footer className="login-footer">Footer here</footer>
     </div>
   );
 };
-
  export default SignupPage;
