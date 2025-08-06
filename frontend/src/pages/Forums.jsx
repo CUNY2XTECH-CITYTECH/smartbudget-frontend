@@ -1,6 +1,7 @@
 // /pages/Forums.jsx
 import React from "react";
 import "./forums.css";
+import Footer from "../components/Footer";
 import ThreadCard from "./ThreadCard";
 
 const dummyThreads = [
@@ -26,6 +27,7 @@ const dummyThreads = [
 
 const Forums = () => {
   return (
+    <div>
     <div className="forums-container">
       <h1 className="forums-header">💬 Community Threads</h1>
       <div className="threads-grid">
@@ -33,6 +35,8 @@ const Forums = () => {
           <ThreadCard key={thread.id} thread={thread} />
         ))}
       </div>
+    </div>
+    <Footer />
     </div>
   );
 };

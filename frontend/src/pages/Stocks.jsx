@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Line } from 'react-chartjs-2';
+import Header from "../components/Header";
+import Footer from "../components/Footer";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -74,6 +76,8 @@ function Stocks() {
   };
 
   return (
+    <div>
+      < Header />
     <div className="stocks-page">
       <h2>Stock Market Viewer</h2>
 
@@ -119,6 +123,8 @@ function Stocks() {
           )}
         </>
       )}
+    </div>
+    <Footer />
     </div>
   );
 }
