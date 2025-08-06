@@ -1,6 +1,7 @@
-import "./MonthlyExpense.css";
+import "./MontlyExpense.css";
 
-const MonthlyBudget = () => (
+
+const MonthlyExpense = () => (
   <div className="budget-container">
     <h1 className="budget-title">Monthly Budget</h1>
     <form className="budget-form">
