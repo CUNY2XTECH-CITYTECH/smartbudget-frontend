@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./signup.css"; // make sure this file exists and is correctly named
+import './signup.css'; // make sure this file exists and is correctly named
+
 
 const Signup = () => {
   const [username, setUsername] = useState("");
-  const [email, setEmail] = useState(""); // optional if not needed in backend
+  const [email, setEmail] = useState(""); 
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
@@ -12,7 +13,7 @@ const Signup = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:5000/signup", {
+      const response = await fetch("/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
