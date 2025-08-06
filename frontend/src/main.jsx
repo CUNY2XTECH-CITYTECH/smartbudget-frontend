@@ -9,6 +9,9 @@ import Login from "./pages/Login.jsx";
 import Dashboard from './pages/dashboard.jsx';
 import MonthlyExpense from './pages/MonthlyExpense.jsx';
 import Signup from "./pages/Signup.jsx";
+import Forums from "./pages/Forums.jsx";
+import Stocks from "./pages/Stocks.jsx";
+
 // import NotFound from "./pages/NotFound.jsx";
 
 const router = createBrowserRouter([
@@ -21,6 +24,9 @@ const router = createBrowserRouter([
       { path: 'dashboard', element: <Dashboard /> },
       { path: 'monthly-expense', element: <MonthlyExpense /> },
       { path: 'signup', element: <Signup /> },
+       { path: "forums", element: <Forums /> },
+       { path: 'stocks', element: <Stocks /> }
+
       // { path: '*', element: <NotFound /> },
     ],
   },

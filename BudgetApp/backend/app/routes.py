@@ -7,6 +7,8 @@ import pandas as pd
 from collections import defaultdict
 import os
 from flask import send_from_directory
+import yfinance as yf
+from flask import request  # make sure this is imported 
 
 main_bp = Blueprint('main', __name__)
 
@@ -136,3 +138,59 @@ def daily_totals():
         "labels": sorted_dates,
         "amounts": values
     })
+
+#------stocks------
+
+@main_bp.route('/api/query', methods=['POST'])
+def query_yfinance():
+    try:
+        data = request.get_json()
+        print("Incoming data:", data)
+
+        ticker = data.get('ticker')
+        period = data.get('period')
+        interval = data.get('interval')
+
+        if not all([ticker, period, interval]):
+            return jsonify({'error': 'Missing required fields'}), 400
+
+        df = yf.download(ticker, period=period, interval=interval)
+        if df.empty:
+            return jsonify({'error': 'No data found'}), 404
+
+        # Clean history for chart
+        history = [
+            {
+                'date': str(date.date()),  # convert Timestamp to string (YYYY-MM-DD)
+                'close': round(float(row['Close']), 2)
+            }
+            for date, row in df.iterrows()
+            if not pd.isna(row['Close'])  # avoid NaNs
+        ]
+
+        # Get clean close prices (drop NaNs)
+        close_prices = df['Close'].dropna()
+
+        # Calculate stats with safe scalar conversions
+        stats = {
+            'min': round(close_prices.min().item(), 2),
+            'max': round(close_prices.max().item(), 2),
+            'average': round(close_prices.mean().item(), 2),
+            'std_dev': round(close_prices.std().item(), 2),
+            'latest': round(close_prices.iloc[-1].item(), 2)
+        }
+        print("Returning data:", {
+            'ticker': ticker.upper(),
+            'history': history,
+            'stats': stats
+})
+
+        return jsonify({
+            'ticker': ticker.upper(),
+            'history': history,
+            'stats': stats
+        })
+
+    except Exception as e:
+        print("Error in /api/query:", e)
+        return jsonify({'error': str(e)}), 500
