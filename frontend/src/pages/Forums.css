@@ -1,0 +1,55 @@
+/* forums.css */
+
+.forums-container {
+    padding: 40px;
+    background: linear-gradient(to bottom right, #e0f7ff, #d3ffe9);
+    min-height: 100vh;
+    font-family: 'Arial', sans-serif;
+  }
+  
+  .forums-header {
+    font-size: 2.5rem;
+    color: #333;
+    margin-bottom: 24px;
+    text-align: center;
+  }
+  
+  .threads-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+  }
+  
+  .thread-card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transition: transform 0.2s ease;
+  }
+  
+  .thread-card:hover {
+    transform: translateY(-5px);
+  }
+  
+  .thread-title {
+    font-size: 1.2rem;
+    color: #333;
+    margin-bottom: 8px;
+  }
+  
+  .thread-meta {
+    font-size: 0.9rem;
+    color: #777;
+    margin-bottom: 16px;
+  }
+  
+  .view-btn {
+    padding: 8px 16px;
+    background: #4b4783;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+  }
+  

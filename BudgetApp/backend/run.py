@@ -5,7 +5,7 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 app.secret_key = "your_super_secret_key"  # required for sessions
-CORS(app, origins=["https://localhost:5173"],supports_credentials=True)
+CORS(app, origins=["http://localhost:5173"],supports_credentials=True)
 
 # Register blueprint from routes.py
 app.register_blueprint(main_bp)
