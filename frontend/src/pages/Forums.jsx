@@ -31,20 +31,10 @@ function Forums() {
     setShowForm(false);
     setNewThread({ title: '', body: '' });
   };
-
-  return (
-<<<<<<< HEAD
-    <div>
-    <div className="forums-container">
-      <h1 className="forums-header">💬 Community Threads</h1>
-      <div className="threads-grid">
-        {dummyThreads.map((thread) => (
-          <ThreadCard key={thread.id} thread={thread} />
-        ))}
-=======
+ return (
     <div className="main-layout">
       <div className="sidebar-placeholder">{/* Your nav component here */}</div>
-  
+
       <div className="forums-container">
         <div className="search-bar">
           <input
@@ -54,19 +44,19 @@ function Forums() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-  
-        <h2 className="forums-header"> Community Threads</h2>
-  
+
+        <h2 className="forums-header">💬 Community Threads</h2>
+
         <div className="thread-list">
           {filteredThreads.map(thread => (
-            <ThreadCard key={thread.id} {...thread} />
+            <ThreadCard key={thread.id} thread={thread} />
           ))}
         </div>
-  
+
         <button className="floating-plus" onClick={() => setShowForm(true)}>
-  <span className="plus-icon">+</span>
-</button>
-  
+          <span className="plus-icon">+</span>
+        </button>
+
         {showForm && (
           <div className="thread-popup">
             <form onSubmit={handleCreateThread} className="thread-form">
@@ -91,12 +81,13 @@ function Forums() {
             </form>
           </div>
         )}
-      </div>
-    </div>
+         </div>
     <Footer />
+
     </div>
   );
   
 }
+
 
 export default Forums;
