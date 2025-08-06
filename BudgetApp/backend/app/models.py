@@ -1,9 +1,9 @@
 
 from . import db
 from datetime import date, datetime
-class User(db.Model):
-    __tablename__ = 'user'  
-    id = db.Column(db.Integer, primary_key=True)
+#class User(db.Model):
+    #__tablename__ = 'user'  
+    #id = db.Column(db.Integer, primary_key=True)
 
 #structure your data base when reading from csv file
 class Expense(db.Model):
