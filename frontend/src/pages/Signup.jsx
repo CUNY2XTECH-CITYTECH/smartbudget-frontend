@@ -1,17 +1,15 @@
+import "./Signup.css";
 import React, { useState } from "react";
-import "./Login.css"; // Reusing your existing login styles
 import { useNavigate } from "react-router-dom";
-
-const Signup = () => {
+const SignupPage = () => {
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-
-  const handleSignup = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      const response = await fetch("http://localhost:5000/signup", {
+      const response = await fetch("/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -19,61 +17,70 @@ const Signup = () => {
         credentials: "include",
         body: JSON.stringify({
           name: username,
+          email: email,
           password: password,
         }),
       });
-
       const data = await response.json();
-
       if (response.ok) {
-        alert("Signup successful! Redirecting to login...");
+        alert("Signup successful! You can now log in.");
         navigate("/login");
       } else {
-        alert(data.message || "Signup failed");
+        alert(data.message || "Signup failed.");
       }
     } catch (error) {
       console.error("Signup error:", error);
-      alert("Something went wrong during signup.");
+      alert("An error occurred during signup.");
     }
   };
-
   return (
     <div className="login-container">
-      <h2 className="login-header">Create an Account</h2>
-
+      <header className="login-header">SmartBudget</header>
       <div className="login-card">
-        <form onSubmit={handleSignup}>
+        <h2>Sign Up</h2>
+        <form onSubmit={handleSubmit}>
           <div className="input-group">
             <label htmlFor="username">Username</label>
             <input
               type="text"
               id="username"
+              name="username"
+              required
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              required
             />
           </div>
-
+          <div className="input-group">
+            <label htmlFor="email">Email Address</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
           <div className="input-group">
             <label htmlFor="password">Password</label>
             <input
               type="password"
               id="password"
+              name="password"
+              required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
+               // required
             />
           </div>
-
-          <button type="submit" className="continue-btn">
-            Sign Up
-          </button>
+          <button type="submit" className="continue-btn">Sign Up</button>
         </form>
+        <div className="guest-link">
+          <span>Already have an account? <a href="/login">Log in</a></span>
+        </div>
       </div>
-
-      <div className="login-footer">Already have an account? Log in above!</div>
+      <footer className="login-footer">Footer here</footer>
     </div>
   );
 };
-
-export default Signup;
+ export default SignupPage;
