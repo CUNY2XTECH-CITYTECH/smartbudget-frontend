@@ -9,7 +9,7 @@ db = SQLAlchemy()
 def create_app():
     app = Flask(
         __name__ , static_folder='../frontend/dist',static_url_path='')
-    CORS(app, origins=["https://localhost:5173"],supports_credentials=True)
+    CORS(app, origins=["http://localhost:5173"],supports_credentials=True)
 
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///budget.db'
     db.init_app(app)

@@ -1,82 +1,77 @@
 import React, { useState } from "react";
+import "./Login.css"; // Reusing your existing login styles
 import { useNavigate } from "react-router-dom";
-import "./signup.css"; // make sure this file exists and is correctly named
 
 const Signup = () => {
   const [username, setUsername] = useState("");
-  const [email, setEmail] = useState(""); // optional if not needed in backend
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
 
     try {
       const response = await fetch("http://localhost:5000/signup", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        credentials: "include", // important for cookies/session
+        credentials: "include",
         body: JSON.stringify({
           name: username,
-          password: password
-          // include email if backend supports it
-        })
+          password: password,
+        }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        alert("Signup successful! Please log in.");
+        alert("Signup successful! Redirecting to login...");
         navigate("/login");
       } else {
-        alert(data.message || "Signup failed.");
+        alert(data.message || "Signup failed");
       }
     } catch (error) {
-      console.error("Error during signup:", error);
-      alert("Something went wrong.");
+      console.error("Signup error:", error);
+      alert("Something went wrong during signup.");
     }
   };
 
   return (
-    <div className="signup-container">
-      <h1 className="signup-header">Sign Up</h1>
-      <form className="signup-card" onSubmit={handleSubmit}>
-        <div className="input-group">
-          <label htmlFor="username">Username:</label>
-          <input
-            type="text"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-        </div>
-        {/* Optional email field */}
-        <div className="input-group">
-          <label htmlFor="email">Email:</label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
-        <div className="input-group">
-          <label htmlFor="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <button className="continue-btn" type="submit">
-          Sign up
-        </button>
-      </form>
+    <div className="login-container">
+      <h2 className="login-header">Create an Account</h2>
+
+      <div className="login-card">
+        <form onSubmit={handleSignup}>
+          <div className="input-group">
+            <label htmlFor="username">Username</label>
+            <input
+              type="text"
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="input-group">
+            <label htmlFor="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          <button type="submit" className="continue-btn">
+            Sign Up
+          </button>
+        </form>
+      </div>
+
+      <div className="login-footer">Already have an account? Log in above!</div>
     </div>
   );
 };
