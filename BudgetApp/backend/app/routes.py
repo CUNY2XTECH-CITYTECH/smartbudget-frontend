@@ -136,3 +136,102 @@ def daily_totals():
         "labels": sorted_dates,
         "amounts": values
     })
+
+@main_bp.route('/threads', methods=['POST'])
+def create_thread():
+    if 'user_id' not in session:
+        return jsonify({"message": "Unauthorized"}), 401
+
+    data = request.get_json()
+    title = data.get("title")
+    content = data.get("content")
+
+    if not title or not content:
+        return jsonify({"message": "Title and content are required"}), 400
+
+    thread = Thread(
+        userID=session['user_id'],
+        title=title,
+        content=content
+    )
+    db.session.add(thread)
+    db.session.commit()
+
+    return jsonify({
+        "message": "Thread created",
+        "threadID": thread.threadID
+    }), 201
+
+
+# GET route to retrieve all threads
+@main_bp.route('/threads', methods=['GET'])
+def get_threads():
+    threads = Thread.query.all()
+
+    return jsonify([
+        {
+            "threadID": t.threadID,
+            "title": t.title,
+            "content": t.content,
+            "userID": t.userID,
+            "timestamp": t.timestamp.isoformat()
+        }
+        for t in threads
+    ])
+
+ 
+@main_bp.route('/threads/<int:thread_id>/comment', methods=['POST'])
+def add_comment(thread_id):
+    if 'user_id' not in session:
+        return jsonify({"message": "Unauthorized"}), 401
+
+    data = request.get_json()
+    content = data.get("content")
+
+    if not content:
+        return jsonify({"message": "Content is required"}), 400
+
+    comment = Comment(
+        threadID=thread_id,
+        userID=session['user_id'],
+        content=content
+    )
+    db.session.add(comment)
+    db.session.commit()
+
+    return jsonify({
+        "message": "Comment added",
+        "commentID": comment.commentID
+    }), 201
+
+@main_bp.route('/threads/<int:thread_id>', methods=['GET'])
+def get_thread_with_comments(thread_id):
+    thread = Thread.query.get_or_4004(thread_id)
+    comments = Comment.query.filter_by(threadID=thread_id).order_by(Comment.timestamp.asc()).all()
+
+    return jsonify({
+        "thread": {
+            "threadID": thread.threadID, 
+            "title": thread.title,
+            "content": thread.content,
+            "userID": thread.userID,
+            "timestamp": thread.timestamp.isoformat()
+        
+        },
+        "comments": [
+            {
+             "commentID": c.commentID,
+             "userID": c.userID,
+             "content": c.content,
+            "timestamp": c.timestamp.isoformat()
+
+            } for c in comments
+        ]
+
+    })
+
+
+
+
+
+
