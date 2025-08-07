@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import "./Login.css";
 
@@ -52,6 +53,6 @@ const Login = () => {
       <footer className="login-footer">Footer here</footer>
     </div>
   );
-}
+};
 
 export default Login;
