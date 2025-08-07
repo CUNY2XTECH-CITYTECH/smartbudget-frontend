@@ -3,13 +3,12 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 const SignupPage = () => {
   const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("/signup", {
+      const response = await fetch("http://localhost:5000/api/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -17,11 +16,17 @@ const SignupPage = () => {
         credentials: "include",
         body: JSON.stringify({
           name: username,
-          email: email,
           password: password,
         }),
       });
-      const data = await response.json();
+    
+      let data = {};
+      try {
+        data = await response.json();
+      } catch (err) {
+        console.error("Failed to parse JSON", err);
+      }
+    
       if (response.ok) {
         alert("Signup successful! You can now log in.");
         navigate("/login");
@@ -32,6 +37,7 @@ const SignupPage = () => {
       console.error("Signup error:", error);
       alert("An error occurred during signup.");
     }
+    
   };
   return (
     <div className="login-container">
@@ -50,17 +56,7 @@ const SignupPage = () => {
               onChange={(e) => setUsername(e.target.value)}
             />
           </div>
-          <div className="input-group">
-            <label htmlFor="email">Email Address</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
+          
           <div className="input-group">
             <label htmlFor="password">Password</label>
             <input
