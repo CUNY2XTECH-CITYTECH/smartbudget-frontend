@@ -7,8 +7,6 @@ import pandas as pd
 from collections import defaultdict
 import os
 from flask import send_from_directory
-import yfinance as yf
-from flask import request  # make sure this is imported 
 
 main_bp = Blueprint('main', __name__)
 
