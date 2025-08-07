@@ -7,8 +7,6 @@ import pandas as pd
 from collections import defaultdict
 import os
 from flask import send_from_directory
-import yfinance as yf
-from flask import request  # make sure this is imported 
 
 main_bp = Blueprint('main', __name__)
 
@@ -139,65 +137,101 @@ def daily_totals():
         "amounts": values
     })
 
-#------stocks------
+@main_bp.route('/threads', methods=['POST'])
+def create_thread():
+    if 'user_id' not in session:
+        return jsonify({"message": "Unauthorized"}), 401
 
-@main_bp.route('/api/query', methods=['POST'])
-def query_yfinance():
-    try:
-        data = request.get_json()
-        print("Incoming data:", data)
+    data = request.get_json()
+    title = data.get("title")
+    content = data.get("content")
 
-        ticker = data.get('ticker')
-        period = data.get('period')
-        interval = data.get('interval')
+    if not title or not content:
+        return jsonify({"message": "Title and content are required"}), 400
 
-        if not all([ticker, period, interval]):
-            return jsonify({'error': 'Missing required fields'}), 400
+    thread = Thread(
+        userID=session['user_id'],
+        title=title,
+        content=content
+    )
+    db.session.add(thread)
+    db.session.commit()
 
-        df = yf.download(ticker, period=period, interval=interval)
+    return jsonify({
+        "message": "Thread created",
+        "threadID": thread.threadID
+    }), 201
 
-# Flatten multi-level columns if they exist
-        if isinstance(df.columns, pd.MultiIndex):
-            df.columns = df.columns.get_level_values(0)
 
-        print("Flattened DataFrame:\n", df.head())
+# GET route to retrieve all threads
+@main_bp.route('/threads', methods=['GET'])
+def get_threads():
+    threads = Thread.query.all()
 
-        if df.empty:
-            return jsonify({'error': 'No data found for given input'}), 404
+    return jsonify([
+        {
+            "threadID": t.threadID,
+            "title": t.title,
+            "content": t.content,
+            "userID": t.userID,
+            "timestamp": t.timestamp.isoformat()
+        }
+        for t in threads
+    ])
 
-        if 'Close' not in df.columns:
-            return jsonify({'error': "'Close' column not found in data"}), 500
+ 
+@main_bp.route('/threads/<int:thread_id>/comment', methods=['POST'])
+def add_comment(thread_id):
+    if 'user_id' not in session:
+        return jsonify({"message": "Unauthorized"}), 401
 
-        # Drop missing Close values
-        df = df.dropna(subset=['Close'])
+    data = request.get_json()
+    content = data.get("content")
 
-        # Build chart history
-        history = [
+    if not content:
+        return jsonify({"message": "Content is required"}), 400
+
+    comment = Comment(
+        threadID=thread_id,
+        userID=session['user_id'],
+        content=content
+    )
+    db.session.add(comment)
+    db.session.commit()
+
+    return jsonify({
+        "message": "Comment added",
+        "commentID": comment.commentID
+    }), 201
+
+@main_bp.route('/threads/<int:thread_id>', methods=['GET'])
+def get_thread_with_comments(thread_id):
+    thread = Thread.query.get_or_4004(thread_id)
+    comments = Comment.query.filter_by(threadID=thread_id).order_by(Comment.timestamp.asc()).all()
+
+    return jsonify({
+        "thread": {
+            "threadID": thread.threadID, 
+            "title": thread.title,
+            "content": thread.content,
+            "userID": thread.userID,
+            "timestamp": thread.timestamp.isoformat()
+        
+        },
+        "comments": [
             {
-                'date': str(index.date()),
-                'close': round(float(close), 2)
-            }
-            for index, close in df['Close'].items()
+             "commentID": c.commentID,
+             "userID": c.userID,
+             "content": c.content,
+            "timestamp": c.timestamp.isoformat()
+
+            } for c in comments
         ]
 
-        close_prices = df['Close']
+    })
 
-        stats = {
-            'min': round(close_prices.min().item(), 2),
-            'max': round(close_prices.max().item(), 2),
-            'average': round(close_prices.mean().item(), 2),
-            'std_dev': round(close_prices.std().item(), 2),
-            'latest': round(close_prices.iloc[-1].item(), 2)
-        }
 
-        result = {
-            'ticker': ticker.upper(),
-            'history': history,
-            'stats': stats
-        }
 
-        return jsonify(result)
 
-    except Exception as e:
-        print("Error in /api/query:", e)
-        return jsonify({'error': str(e)}), 500
+
+
