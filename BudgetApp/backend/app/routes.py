@@ -18,22 +18,34 @@ main_bp = Blueprint('main', __name__)
 # -------------------- Signup --------------------
 @main_bp.route('/signup', methods=['POST'])
 def signup():
-    data = request.get_json()
-    name = data.get('name')
-    password = data.get('password')
+    try:
+        data = request.get_json()
+        name = data.get('name')
+        password = data.get('password')
 
-    if not name or not password:
-        return jsonify({"message": "Missing username or password"}), 400
+        if not name or not password:
+            return jsonify({"message": "Missing username or password"}), 400
 
-    if User.query.filter_by(name=name).first():
-        return jsonify({"message": "Username already taken"}), 400
+        if User.query.filter_by(username=name).first():
+            return jsonify({"message": "Username already taken"}), 400
 
-    hashed_pw = generate_password_hash(password)
-    new_user = User(name=name, password=hashed_pw)
-    db.session.add(new_user)
-    db.session.commit()
+        hashed_pw = generate_password_hash(password)
+        new_user = User(username=name, password=hashed_pw)
+        db.session.add(new_user)
+        db.session.commit()
 
-    return jsonify({"message": "User registered successfully"}), 201
+        return jsonify({
+            "message": "User registered successfully",
+            "userID": new_user.userID,
+            "username": new_user.username
+        }), 201
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()  # ✅ This will show you full stack trace in terminal
+        return jsonify({"message": "Internal server error", "error": str(e)}), 500
+
+
 
 # -------------------- Login --------------------
 @main_bp.route('/login', methods=['POST'])
@@ -42,12 +54,12 @@ def login():
     name = data.get('name')
     password = data.get('password')
 
-    user = User.query.filter_by(name=name).first()
+    user = User.query.filter_by(username=name).first()
 
     if user and check_password_hash(user.password, password):
         session.permanent = True  # ⬅️ this makes session use the configured timeout
         session['user_id'] = user.userID
-        session['username'] = user.name
+        session['username'] = user.username
         return jsonify({"message": "Login successful"}), 200
 
     return jsonify({"message": "Invalid credentials"}), 401
@@ -137,101 +149,106 @@ def daily_totals():
         "amounts": values
     })
 
-@main_bp.route('/threads', methods=['POST'])
-def create_thread():
-    if 'user_id' not in session:
-        return jsonify({"message": "Unauthorized"}), 401
+#------stocks------
 
-    data = request.get_json()
-    title = data.get("title")
-    content = data.get("content")
+@main_bp.route('/api/query', methods=['POST'])
+def query_yfinance():
+    try:
+        data = request.get_json()
+        print("Incoming data:", data)
 
-    if not title or not content:
-        return jsonify({"message": "Title and content are required"}), 400
+        ticker = data.get('ticker')
+        period = data.get('period')
+        interval = data.get('interval')
 
-    thread = Thread(
-        userID=session['user_id'],
-        title=title,
-        content=content
-    )
-    db.session.add(thread)
-    db.session.commit()
+        if not all([ticker, period, interval]):
+            return jsonify({'error': 'Missing required fields'}), 400
 
-    return jsonify({
-        "message": "Thread created",
-        "threadID": thread.threadID
-    }), 201
+        df = yf.download(ticker, period=period, interval=interval)
 
+# Flatten multi-level columns if they exist
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = df.columns.get_level_values(0)
 
-# GET route to retrieve all threads
-@main_bp.route('/threads', methods=['GET'])
-def get_threads():
-    threads = Thread.query.all()
+        print("Flattened DataFrame:\n", df.head())
 
-    return jsonify([
-        {
-            "threadID": t.threadID,
-            "title": t.title,
-            "content": t.content,
-            "userID": t.userID,
-            "timestamp": t.timestamp.isoformat()
-        }
-        for t in threads
-    ])
+        if df.empty:
+            return jsonify({'error': 'No data found for given input'}), 404
 
- 
-@main_bp.route('/threads/<int:thread_id>/comment', methods=['POST'])
-def add_comment(thread_id):
-    if 'user_id' not in session:
-        return jsonify({"message": "Unauthorized"}), 401
+        if 'Close' not in df.columns:
+            return jsonify({'error': "'Close' column not found in data"}), 500
 
-    data = request.get_json()
-    content = data.get("content")
+        # Drop missing Close values
+        df = df.dropna(subset=['Close'])
 
-    if not content:
-        return jsonify({"message": "Content is required"}), 400
-
-    comment = Comment(
-        threadID=thread_id,
-        userID=session['user_id'],
-        content=content
-    )
-    db.session.add(comment)
-    db.session.commit()
-
-    return jsonify({
-        "message": "Comment added",
-        "commentID": comment.commentID
-    }), 201
-
-@main_bp.route('/threads/<int:thread_id>', methods=['GET'])
-def get_thread_with_comments(thread_id):
-    thread = Thread.query.get_or_4004(thread_id)
-    comments = Comment.query.filter_by(threadID=thread_id).order_by(Comment.timestamp.asc()).all()
-
-    return jsonify({
-        "thread": {
-            "threadID": thread.threadID, 
-            "title": thread.title,
-            "content": thread.content,
-            "userID": thread.userID,
-            "timestamp": thread.timestamp.isoformat()
-        
-        },
-        "comments": [
+        # Build chart history
+        history = [
             {
-             "commentID": c.commentID,
-             "userID": c.userID,
-             "content": c.content,
-            "timestamp": c.timestamp.isoformat()
-
-            } for c in comments
+                'date': str(index.date()),
+                'close': round(float(close), 2)
+            }
+            for index, close in df['Close'].items()
         ]
 
-    })
+        close_prices = df['Close']
 
+        stats = {
+            'min': round(close_prices.min().item(), 2),
+            'max': round(close_prices.max().item(), 2),
+            'average': round(close_prices.mean().item(), 2),
+            'std_dev': round(close_prices.std().item(), 2),
+            'latest': round(close_prices.iloc[-1].item(), 2)
+        }
 
+        result = {
+            'ticker': ticker.upper(),
+            'history': history,
+            'stats': stats
+        }
 
+        return jsonify(result)
 
+    except Exception as e:
+        print("Error in /api/query:", e)
+        return jsonify({'error': str(e)}), 500
 
+@main_bp.route('/api/threads', methods=['GET'])
+def get_threads():
+    threads = Thread.query.order_by(Thread.timestamp.desc()).all()
+    return jsonify([
+        {
+            'threadID': t.threadID,
+            'title': t.title,
+            'content': t.content,
+            'userID': t.userID,
+            'timestamp': t.timestamp.isoformat()
+        } for t in threads
+    ])
 
+@main_bp.route('/api/threads', methods=['POST'])
+def create_thread():
+    data = request.get_json()
+    user_id = data.get('userID')
+    title = data.get('title')
+    body = data.get('body')
+
+    if not user_id or not title or not body:
+        return jsonify({'error': 'Missing required fields'}), 400
+
+    # Insert into DB
+    cur = db_conn.cursor()
+    cur.execute(
+        "INSERT INTO threads (userID, title, content) VALUES (%s, %s, %s) RETURNING threadID, timestamp",
+        (user_id, title, body)
+    )
+    thread_id, timestamp = cur.fetchone()
+    db_conn.commit()
+    cur.close()
+
+    return jsonify({
+        'threadID': thread_id,
+        'userID': user_id,
+        'title': title,
+        'content': body,
+        'timestamp': timestamp.isoformat()
+    }), 201

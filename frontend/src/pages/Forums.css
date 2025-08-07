@@ -1,55 +1,153 @@
-/* forums.css */
+/* Forums.css */
 
-.forums-container {
-    padding: 40px;
-    background: linear-gradient(to bottom right, #e0f7ff, #d3ffe9);
-    min-height: 100vh;
-    font-family: 'Arial', sans-serif;
+.main-layout {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+  }
+  
+  
+  .forums-container {
+    flex: 1;
+    background: linear-gradient(-45deg, #8ecae6, #b0c4b1, #669bbc, #8ecae6);
+    background-size: 400% 400%;
+    animation: rippleGradient 15s ease infinite;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    box-sizing: border-box;
+    overflow-y: auto;
+    position: relative;
+  }
+  
+  
+  .search-bar {
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 1rem;
+  }
+  
+  .search-bar input {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
   }
   
   .forums-header {
-    font-size: 2.5rem;
-    color: #333;
-    margin-bottom: 24px;
+    font-size: 2rem;
+    margin-bottom: 1rem;
     text-align: center;
   }
   
-  .threads-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 24px;
+  .thread-list {
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
   }
   
-  .thread-card {
-    background: white;
-    border-radius: 16px;
-    padding: 20px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    transition: transform 0.2s ease;
-  }
-  
-  .thread-card:hover {
-    transform: translateY(-5px);
-  }
-  
-  .thread-title {
-    font-size: 1.2rem;
-    color: #333;
-    margin-bottom: 8px;
-  }
-  
-  .thread-meta {
-    font-size: 0.9rem;
-    color: #777;
-    margin-bottom: 16px;
-  }
-  
-  .view-btn {
-    padding: 8px 16px;
-    background: #4b4783;
+  /* Plus Button */
+  .floating-plus {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: #669bbc; /* Use a contrasting soft blue */
     color: white;
     border: none;
-    border-radius: 20px;
+    font-size: 2rem;
+    border-radius: 50px;
+    width: 80px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     cursor: pointer;
+    z-index: 999;
+    transition: background 0.2s ease;
   }
+  
+  .floating-plus:hover {
+    background: #8ecae6;
+  }
+  
+  .plus-icon {
+    font-size: 2rem;
+    line-height: 1;
+    pointer-events: none;
+  }
+  
+  
+  /* Thread Popup */
+  .thread-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .thread-form {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .thread-form input,
+  .thread-form textarea {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    resize: vertical;
+  }
+  
+  .popup-buttons {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .main-layout {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+  }
+  
+  @keyframes rippleGradient {
+    0% {
+      background-position: 0% 50%;
+    }
+    25% {
+      background-position: 50% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    75% {
+      background-position: 50% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+  
+  
+
   

@@ -1,9 +1,7 @@
 
 from . import db
 from datetime import date, datetime
-#class User(db.Model):
-    #__tablename__ = 'user'  
-    #id = db.Column(db.Integer, primary_key=True)
+
 
 #structure your data base when reading from csv file
 class Expense(db.Model):
@@ -16,9 +14,19 @@ class Expense(db.Model):
 
 class User(db.Model):
     __tablename__ = 'users'
+
     userID = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100))
-    password = db.Column(db.String(100), nullable=False)# 2. Transactions Table
+    username = db.Column(db.String(100), unique=True, nullable=False)
+    password = db.Column(db.String(100), nullable=False)
+
+    # Relationships
+    threads = db.relationship('Thread', backref='author', lazy=True)
+    comments = db.relationship('Comment', backref='author', lazy=True)
+
+    def __repr__(self):
+        return f'<User {self.username}>'
+    
+# 2. Transactions Table
 class Transaction(db.Model):
     __tablename__ = 'transactions'
     transactionID = db.Column(db.Integer, primary_key=True)
@@ -39,18 +47,37 @@ class Stock(db.Model):
     symbol = db.Column(db.String(10))
     companyName = db.Column(db.String(100))
     currentPrice = db.Column(db.Float)
-    lastUpdated = db.Column(db.Date)# 5. Threads Table
+    lastUpdated = db.Column(db.Date)
+
+    #5. Thread
 class Thread(db.Model):
     __tablename__ = 'threads'
+
     threadID = db.Column(db.Integer, primary_key=True)
-    userID = db.Column(db.Integer, db.ForeignKey('users.userID'))
-    title = db.Column(db.String(200))
-    content = db.Column(db.Text)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)# 6. Comments Table
+    userID = db.Column(db.Integer, db.ForeignKey('users.userID'), nullable=False)
+    title = db.Column(db.String(200), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # One-to-many: one thread has many comments
+    comments = db.relationship('Comment', backref='thread', lazy=True, cascade='all, delete')
+
+    def __repr__(self):
+        return f'<Thread {self.title}>'
+
+# ---------------------
+# Comment Model
+# ---------------------
 class Comment(db.Model):
     __tablename__ = 'comments'
+
     commentID = db.Column(db.Integer, primary_key=True)
-    threadID = db.Column(db.Integer, db.ForeignKey('threads.threadID'))
-    userID = db.Column(db.Integer, db.ForeignKey('users.userID'))
-    content = db.Column(db.Text)
+    threadID = db.Column(db.Integer, db.ForeignKey('threads.threadID'), nullable=False)
+    userID = db.Column(db.Integer, db.ForeignKey('users.userID'), nullable=False)
+    content = db.Column(db.Text, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<Comment by User {self.userID} on Thread {self.threadID}>'
+
+
