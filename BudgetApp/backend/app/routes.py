@@ -21,13 +21,17 @@ main_bp = Blueprint('main', __name__)
 @main_bp.route('/signup', methods=['POST'])
 def signup():
     data = request.get_json()
+    print("Received data:", data)  # ✅ Check incoming data
+
     name = data.get('name')
     password = data.get('password')
 
     if not name or not password:
+        print("Missing fields")
         return jsonify({"message": "Missing username or password"}), 400
 
     if User.query.filter_by(name=name).first():
+        print("Username taken")
         return jsonify({"message": "Username already taken"}), 400
 
     hashed_pw = generate_password_hash(password)
@@ -35,7 +39,9 @@ def signup():
     db.session.add(new_user)
     db.session.commit()
 
+    print("Signup success")
     return jsonify({"message": "User registered successfully"}), 201
+
 
 # -------------------- Login --------------------
 @main_bp.route('/login', methods=['POST'])
@@ -201,3 +207,44 @@ def query_yfinance():
     except Exception as e:
         print("Error in /api/query:", e)
         return jsonify({'error': str(e)}), 500
+
+@main_bp.route('/api/threads', methods=['GET'])
+def get_threads():
+    threads = Thread.query.order_by(Thread.timestamp.desc()).all()
+    return jsonify([
+        {
+            'threadID': t.threadID,
+            'title': t.title,
+            'content': t.content,
+            'userID': t.userID,
+            'timestamp': t.timestamp.isoformat()
+        } for t in threads
+    ])
+
+@main_bp.route('/api/threads', methods=['POST'])
+def create_thread():
+    data = request.get_json()
+    user_id = data.get('userID')
+    title = data.get('title')
+    body = data.get('body')
+
+    if not user_id or not title or not body:
+        return jsonify({'error': 'Missing required fields'}), 400
+
+    # Insert into DB
+    cur = db_conn.cursor()
+    cur.execute(
+        "INSERT INTO threads (userID, title, content) VALUES (%s, %s, %s) RETURNING threadID, timestamp",
+        (user_id, title, body)
+    )
+    thread_id, timestamp = cur.fetchone()
+    db_conn.commit()
+    cur.close()
+
+    return jsonify({
+        'threadID': thread_id,
+        'userID': user_id,
+        'title': title,
+        'content': body,
+        'timestamp': timestamp.isoformat()
+    }), 201
