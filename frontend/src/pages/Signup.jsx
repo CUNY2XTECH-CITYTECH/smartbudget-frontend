@@ -8,7 +8,7 @@ const SignupPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("/signup", {
+      const response = await fetch("http://localhost:5000/api/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -16,11 +16,17 @@ const SignupPage = () => {
         credentials: "include",
         body: JSON.stringify({
           name: username,
-          
           password: password,
         }),
       });
-      const data = await response.json();
+    
+      let data = {};
+      try {
+        data = await response.json();
+      } catch (err) {
+        console.error("Failed to parse JSON", err);
+      }
+    
       if (response.ok) {
         alert("Signup successful! You can now log in.");
         navigate("/login");
@@ -31,6 +37,7 @@ const SignupPage = () => {
       console.error("Signup error:", error);
       alert("An error occurred during signup.");
     }
+    
   };
   return (
     <div className="login-container">

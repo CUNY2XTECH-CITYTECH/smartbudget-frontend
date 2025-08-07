@@ -20,27 +20,33 @@ main_bp = Blueprint('main', __name__)
 # -------------------- Signup --------------------
 @main_bp.route('/signup', methods=['POST'])
 def signup():
-    data = request.get_json()
-    print("Received data:", data)  # ✅ Check incoming data
+    try:
+        data = request.get_json()
+        name = data.get('name')
+        password = data.get('password')
 
-    name = data.get('name')
-    password = data.get('password')
+        if not name or not password:
+            return jsonify({"message": "Missing username or password"}), 400
 
-    if not name or not password:
-        print("Missing fields")
-        return jsonify({"message": "Missing username or password"}), 400
+        if User.query.filter_by(username=name).first():
+            return jsonify({"message": "Username already taken"}), 400
 
-    if User.query.filter_by(name=name).first():
-        print("Username taken")
-        return jsonify({"message": "Username already taken"}), 400
+        hashed_pw = generate_password_hash(password)
+        new_user = User(username=name, password=hashed_pw)
+        db.session.add(new_user)
+        db.session.commit()
 
-    hashed_pw = generate_password_hash(password)
-    new_user = User(name=name, password=hashed_pw)
-    db.session.add(new_user)
-    db.session.commit()
+        return jsonify({
+            "message": "User registered successfully",
+            "userID": new_user.userID,
+            "username": new_user.username
+        }), 201
 
-    print("Signup success")
-    return jsonify({"message": "User registered successfully"}), 201
+    except Exception as e:
+        import traceback
+        traceback.print_exc()  # ✅ This will show you full stack trace in terminal
+        return jsonify({"message": "Internal server error", "error": str(e)}), 500
+
 
 
 # -------------------- Login --------------------
@@ -50,12 +56,12 @@ def login():
     name = data.get('name')
     password = data.get('password')
 
-    user = User.query.filter_by(name=name).first()
+    user = User.query.filter_by(username=name).first()
 
     if user and check_password_hash(user.password, password):
         session.permanent = True  # ⬅️ this makes session use the configured timeout
         session['user_id'] = user.userID
-        session['username'] = user.name
+        session['username'] = user.username
         return jsonify({"message": "Login successful"}), 200
 
     return jsonify({"message": "Invalid credentials"}), 401
