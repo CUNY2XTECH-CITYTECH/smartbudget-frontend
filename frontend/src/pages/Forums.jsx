@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import './Forums.css';
 import ThreadCard from './ThreadCard.jsx';
+import Footer from "../components/Footer"; 
 
 const dummyThreads = [
   { id: 1, title: 'How do you budget groceries under $200?', author: 'Talisha', time: '2 hours ago' },
@@ -80,10 +81,9 @@ function Forums() {
               </div>
             </form>
           </div>
-        )}
+        )} 
+        <Footer />
          </div>
-    <Footer />
-
     </div>
   );
   
