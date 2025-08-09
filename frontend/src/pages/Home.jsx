@@ -5,6 +5,7 @@ import logo from "./logo.png";
 function Home() {
   return (
     <div className="home-container">
+      {/* Original header with auth links */}
       <header className="home-header">
         <div className="left-section">
           <img src={logo} alt="SmartBudget Logo" className="logo" />
@@ -16,7 +17,13 @@ function Home() {
         </div>
       </header>
 
-      <main className="home-main">
+      {/* Main content centered with hero + menu */}
+      <main className="page-width home-main">
+        <section className="hero">
+          <h1>Take control of your money.</h1>
+          <p>Track spending, budget smarter, and grow with simple insights.</p>
+        </section>
+
         <div className="menu-box">
           <Link to="/dashboard" className="menu-button">Dashboard</Link>
           <Link to="/stocks" className="menu-button">Stocks</Link>
@@ -25,9 +32,7 @@ function Home() {
         </div>
       </main>
 
-      <footer className="home-footer">
-        Footer here
-      </footer>
+      <footer className="home-footer">Footer here</footer>
     </div>
   );
 }
