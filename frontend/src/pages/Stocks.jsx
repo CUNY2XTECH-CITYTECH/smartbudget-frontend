@@ -1,3 +1,4 @@
+// src/pages/Stocks.jsx
 import "./Stocks.css";
 
 import { useState } from "react";
@@ -11,10 +12,11 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import SidebarShell from "../components/SidebarShell.jsx"; // ⬅️ add this
 
 ChartJS.register(CategoryScale, LinearScale, LineElement, PointElement, Tooltip, Legend);
 
-function Stocks() {
+export default function Stocks() {
   const [formData, setFormData] = useState({
     period: "1mo",
     interval: "1d",
@@ -76,107 +78,107 @@ function Stocks() {
   };
 
   return (
-    <div className="stocks-page">
-      <h2>Stock Market Viewer</h2>
+    <SidebarShell>
+      <div className="stocks-page">
+        <h2>Stock Market Viewer</h2>
 
-      <form onSubmit={handleSubmit}>
-        <input
-          name="ticker"
-          placeholder="e.g. AAPL"
-          value={formData.ticker}
-          onChange={handleChange}
-          required
-        />
-        <select name="period" value={formData.period} onChange={handleChange}>
-          <option value="5d">5 Days</option>
-          <option value="1mo">1 Month</option>
-          <option value="3mo">3 Months</option>
-          <option value="6mo">6 Months</option>
-          <option value="1y">1 Year</option>
-        </select>
-        <select name="interval" value={formData.interval} onChange={handleChange}>
-          <option value="1d">1 Day</option>
-          <option value="1wk">1 Week</option>
-          <option value="1mo">1 Month</option>
-        </select>
-        <button type="submit">Get Stock Data</button>
-      </form>
+        <form onSubmit={handleSubmit}>
+          <input
+            name="ticker"
+            placeholder="e.g. AAPL"
+            value={formData.ticker}
+            onChange={handleChange}
+            required
+          />
+          <select name="period" value={formData.period} onChange={handleChange}>
+            <option value="5d">5 Days</option>
+            <option value="1mo">1 Month</option>
+            <option value="3mo">3 Months</option>
+            <option value="6mo">6 Months</option>
+            <option value="1y">1 Year</option>
+          </select>
+          <select name="interval" value={formData.interval} onChange={handleChange}>
+            <option value="1d">1 Day</option>
+            <option value="1wk">1 Week</option>
+            <option value="1mo">1 Month</option>
+          </select>
+          <button type="submit">Get Stock Data</button>
+        </form>
 
-      {error && <p style={{ color: "red" }}>Error: {error}</p>}
+        {error && <p style={{ color: "red" }}>Error: {error}</p>}
 
-      <div className="stocks-layout">
-        {/* LEFT COLUMN */}
-        <div>
-          <div className="card chart-card">
-            <div className="chart-box">
-              {chartData ? (
-                <Line data={chartData} options={{ maintainAspectRatio: false }} />
-              ) : (
-                <div
-                  style={{
-                    display: "grid",
-                    placeItems: "center",
-                    height: "100%",
-                    color: "#4a5759",
-                    fontWeight: 600,
-                  }}
-                >
-                  Chart will appear here
-                </div>
-              )}
-            </div>
-          </div>
-
-          {stats && (
-            <div className="card" style={{ marginTop: 16 }}>
-              <h3>Statistics for {query?.ticker}</h3>
-
-              {/* Full-width stats grid */}
-              <div className="stats-box">
-                <div className="stat-item">
-                  <div className="stat-label">Latest</div>
-                  <div className="stat-value">${stats.latest}</div>
-                </div>
-                <div className="stat-item">
-                  <div className="stat-label">Average</div>
-                  <div className="stat-value">${stats.average}</div>
-                </div>
-                <div className="stat-item">
-                  <div className="stat-label">Min</div>
-                  <div className="stat-value">${stats.min}</div>
-                </div>
-                <div className="stat-item">
-                  <div className="stat-label">Max</div>
-                  <div className="stat-value">${stats.max}</div>
-                </div>
-                <div className="stat-item">
-                  <div className="stat-label">Std Dev</div>
-                  <div className="stat-value">{stats.std_dev}</div>
-                </div>
+        <div className="stocks-layout">
+          {/* LEFT COLUMN */}
+          <div>
+            <div className="card chart-card">
+              <div className="chart-box">
+                {chartData ? (
+                  <Line data={chartData} options={{ maintainAspectRatio: false }} />
+                ) : (
+                  <div
+                    style={{
+                      display: "grid",
+                      placeItems: "center",
+                      height: "100%",
+                      color: "#4a5759",
+                      fontWeight: 600,
+                    }}
+                  >
+                    Chart will appear here
+                  </div>
+                )}
               </div>
             </div>
-          )}
-        </div>
 
-        {/* RIGHT COLUMN — NEWS PLACEHOLDER */}
-        <div className="card news-card">
-          <h3>Latest Stock News</h3>
-          <div className="news-item">
-            <div className="headline">Headline placeholder #1</div>
-            <div className="meta">Source • Time</div>
+            {stats && (
+              <div className="card" style={{ marginTop: 16 }}>
+                <h3>Statistics for {query?.ticker}</h3>
+
+                {/* Full-width stats grid */}
+                <div className="stats-box">
+                  <div className="stat-item">
+                    <div className="stat-label">Latest</div>
+                    <div className="stat-value">${stats.latest}</div>
+                  </div>
+                  <div className="stat-item">
+                    <div className="stat-label">Average</div>
+                    <div className="stat-value">${stats.average}</div>
+                  </div>
+                  <div className="stat-item">
+                    <div className="stat-label">Min</div>
+                    <div className="stat-value">${stats.min}</div>
+                  </div>
+                  <div className="stat-item">
+                    <div className="stat-label">Max</div>
+                    <div className="stat-value">${stats.max}</div>
+                  </div>
+                  <div className="stat-item">
+                    <div className="stat-label">Std Dev</div>
+                    <div className="stat-value">{stats.std_dev}</div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-          <div className="news-item">
-            <div className="headline">Headline placeholder #2</div>
-            <div className="meta">Source • Time</div>
-          </div>
-          <div className="news-item">
-            <div className="headline">Headline placeholder #3</div>
-            <div className="meta">Source • Time</div>
+
+          {/* RIGHT COLUMN — NEWS PLACEHOLDER */}
+          <div className="card news-card">
+            <h3>Latest Stock News</h3>
+            <div className="news-item">
+              <div className="headline">Headline placeholder #1</div>
+              <div className="meta">Source • Time</div>
+            </div>
+            <div className="news-item">
+              <div className="headline">Headline placeholder #2</div>
+              <div className="meta">Source • Time</div>
+            </div>
+            <div className="news-item">
+              <div className="headline">Headline placeholder #3</div>
+              <div className="meta">Source • Time</div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </SidebarShell>
   );
 }
-
-export default Stocks;

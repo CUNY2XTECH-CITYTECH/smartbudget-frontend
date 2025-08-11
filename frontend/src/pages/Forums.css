@@ -10,7 +10,7 @@
   
   .forums-container {
     flex: 1;
-    background: linear-gradient(-45deg, #8ecae6, #b0c4b1, #669bbc, #8ecae6);
+    background: none;
     background-size: 400% 400%;
     animation: rippleGradient 15s ease infinite;
     display: flex;
