@@ -147,20 +147,4 @@
 @media (prefers-reduced-motion: reduce) {
   .login-container { animation: none; }
 }
-/* Make the container take full screen and center its contents */
-.signup-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    min-width: 100vw;
-    background: #faf9f6;
-    padding: 20px;
-    box-sizing: border-box;
-    font-family: "Arial", sans-serif;
-    overflow: hidden;
-    position: relative;
-  }
 
-  

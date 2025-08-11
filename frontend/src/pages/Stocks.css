@@ -1,3 +1,5 @@
+html, body { height: 100vh; overflow: hidden; }
+
 /* ===== Theme / ripple like the rest of the app ===== */
 :root{
     --bg1:#dfeaf1; --bg2:#c6dbe7; --bg3:#8fa7b2; --bg4:#7fb6c9;
@@ -16,21 +18,23 @@
   }
   
   /* ===== Page container ===== */
-  .stocks-page{
-    min-height:100vh; width:100vw;
-    font-family:'Poppins',sans-serif;
-    background:linear-gradient(270deg,var(--bg1),var(--bg2),var(--bg3),var(--bg4));
-    background-size:800% 800%;
-    animation:rippleGradient 20s ease infinite;
+  .stocks-page {
+    min-height: 100vh;
+    width: 100vw;
+    font-family: 'Poppins', sans-serif;
+    background: none;
+    background-size: 800% 800%;
+    animation: rippleGradient 20s ease infinite;
   
-    display:flex; flex-direction:column; align-items:center;
-    .stocks-page {
-        .stocks-page {
-            padding: 30px 20px 40px;
-          }
-          
-      }
-        }
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  
+    /* This moves your content higher on the page */
+    padding: 40px 20px 40px; /* was 30px — reduce top padding to move up */
+    box-sizing: border-box;
+  }
+  
   
   /* Title */
   .stocks-page h2{
@@ -162,3 +166,42 @@
     color: #333;
   }
   
+  /* --- HARD lock: no page scroll --- */
+html, body { height: 100vh; overflow: hidden; }
+
+/* Use % instead of 100vw to avoid accidental horizontal scrollbars */
+.stocks-page{
+  min-height:100vh;
+  width:100%;                 /* was 100vw */
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  padding:90px 0 32px;        /* clear header/hamburger; no side padding here */
+  box-sizing:border-box;
+}
+
+/* Center rail that never shifts when sidebar opens/closes */
+.stocks-rail{
+  width: min(1100px, 100%);   /* your preferred max width */
+  margin: 0 auto;             /* <— centers everything */
+  padding: 0 16px;            /* soft gutters inside the rail */
+  box-sizing: border-box;
+}
+
+/* Make your blocks follow the rail’s width (no jump) */
+.stocks-page form,
+.stocks-layout{
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Optional safety: if any child tries to overflow, clip it (prevents x-scroll) */
+.stocks-page * { max-width: 100%; }
+
+/* Keep the chart height but ensure it never forces scroll */
+.chart-card { height: 320px; overflow: hidden; }
+.chart-box { position: absolute; inset: 12px; }
+.chart-box canvas{ height:100% !important; width:100% !important; }
+
