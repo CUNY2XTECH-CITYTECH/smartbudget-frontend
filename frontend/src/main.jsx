@@ -10,7 +10,7 @@ import Signup from "./pages/Signup.jsx";
 import Forums from "./pages/Forums.jsx";
 import Stocks from "./pages/Stocks.jsx";
 import Dashboard from './pages/Dashboard.jsx';
-// import Expenses from './pages/Expenses.jsx'; // Optional
+import Expenses from './pages/Expenses.jsx';
 // import NotFound from "./pages/NotFound.jsx";
 
 const router = createBrowserRouter([
@@ -24,7 +24,7 @@ const router = createBrowserRouter([
       { path: 'forums', element: <Forums /> },
       { path: 'stocks', element: <Stocks /> },
       { path: 'dashboard', element: <Dashboard /> },
-      // { path: 'expenses', element: <Expenses /> }, // Commented out
+      { path: 'expenses', element: <Expenses /> }, 
       // { path: '*', element: <NotFound /> },
     ],
   },
