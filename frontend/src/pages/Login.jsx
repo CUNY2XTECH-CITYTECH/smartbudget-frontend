@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import "./login.css";
 
-import { useState } from "react";
 import "./Login.css";
 
 
@@ -14,7 +13,7 @@ const Login = () => {
   const { search } = useLocation();
   const justSignedUp = new URLSearchParams(search).get("new") === "1";
 
-  const handleSubmit = (e) => {
+  const handleSubmit =  async (e) => {
     e.preventDefault();
     try {
       const response = await fetch("http://localhost:5000/api/login", {
