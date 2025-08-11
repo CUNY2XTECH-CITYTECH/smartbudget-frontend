@@ -1,40 +1,53 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Pie, Line } from 'react-chartjs-2';
+import React, { useState, useEffect } from "react";
+import "./Expenses.css"; // <— make sure this file is in the same folder
+import axios from "axios";
+import { Pie, Line } from "react-chartjs-2";
 import {
-  Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement,
-  LineElement, PointElement, Tooltip, Legend
-} from 'chart.js';
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  ArcElement,
+  LineElement,
+  PointElement,
+  Tooltip,
+  Legend,
+} from "chart.js";
 
 ChartJS.register(
-  CategoryScale, LinearScale, BarElement, ArcElement,
-  LineElement, PointElement, Tooltip, Legend
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  ArcElement,
+  LineElement,
+  PointElement,
+  Tooltip,
+  Legend
 );
 
 const Expenses = () => {
   const [formData, setFormData] = useState({
-    description: '',
-    amount: '',
-    category: '',
-    date: ''
+    description: "",
+    amount: "",
+    category: "",
+    date: "",
   });
 
   const [file, setFile] = useState(null);
   const [categoryData, setCategoryData] = useState(null);
   const [dailyData, setDailyData] = useState(null);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
 
-  // Fetch chart data
   const fetchCharts = async () => {
     try {
       const [categoryRes, dailyRes] = await Promise.all([
-        axios.get('/expenses/chart-data'),
-        axios.get('/expenses/daily')
+        axios.get("/expenses/chart-data"),
+        axios.get("/expenses/daily"),
       ]);
       setCategoryData(categoryRes.data);
       setDailyData(dailyRes.data);
     } catch (err) {
-      console.error('Error fetching charts:', err);
+      console.error("Error fetching charts:", err);
     }
   };
 
@@ -42,17 +55,16 @@ const Expenses = () => {
     fetchCharts();
   }, []);
 
-  // Handle manual expense input
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleExpenseSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('/expenses', formData);
-      setFormData({ description: '', amount: '', category: '', date: '' });
+      await axios.post("/expenses", formData);
+      setFormData({ description: "", amount: "", category: "", date: "" });
       setMessage("Expense added!");
       fetchCharts();
     } catch (err) {
@@ -61,15 +73,14 @@ const Expenses = () => {
     }
   };
 
-  // Handle CSV Upload
   const handleCsvUpload = async (e) => {
     e.preventDefault();
     if (!file) return;
-    const formData = new FormData();
-    formData.append('file', file);
+    const up = new FormData();
+    up.append("file", file);
 
     try {
-      await axios.post('/upload', formData);
+      await axios.post("/upload", up);
       setFile(null);
       setMessage("CSV uploaded successfully!");
       fetchCharts();
@@ -80,67 +91,128 @@ const Expenses = () => {
   };
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '900px', margin: 'auto' }}>
-      <h1>📊 Expense Tracker Dashboard</h1>
-
-      {/* Message */}
-      {message && <p style={{ color: 'green' }}>{message}</p>}
-
-      {/* Form to add expense */}
-      <div style={{ marginBottom: '2rem' }}>
-        <h3>Add Expense Manually</h3>
-        <form onSubmit={handleExpenseSubmit} style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-          <input name="description" placeholder="Description" value={formData.description} onChange={handleInputChange} required />
-          <input name="amount" type="number" placeholder="Amount" value={formData.amount} onChange={handleInputChange} required />
-          <input name="category" placeholder="Category" value={formData.category} onChange={handleInputChange} required />
-          <input name="date" type="date" value={formData.date} onChange={handleInputChange} required />
-          <button type="submit">Add</button>
-        </form>
-      </div>
-
-      {/* CSV Upload */}
-      <div style={{ marginBottom: '2rem' }}>
-        <h3>Upload CSV</h3>
-        <form onSubmit={handleCsvUpload}>
-          <input type="file" accept=".csv" onChange={(e) => setFile(e.target.files[0])} />
-          <button type="submit" style={{ marginLeft: '1rem' }}>Upload</button>
-        </form>
-      </div>
-
-      {/* Charts */}
-      <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-        {categoryData && (
-          <div style={{ width: '400px' }}>
-            <h3>Expenses by Category</h3>
-            <Pie
-              data={{
-                labels: categoryData.labels,
-                datasets: [{
-                  data: categoryData.amounts,
-                  backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#A1DE93', '#FFB6C1', '#8A2BE2'],
-                }]
-              }}
-            />
-          </div>
+    <div className="expenses-container">
+      <div className="expenses-inner">
+        <h1 className="expenses-title">📊 Expense Tracker Dashboard</h1>
+        {message && (
+          <p
+            className={`expenses-msg${
+              message.toLowerCase().includes("fail") ? " error" : ""
+            }`}
+          >
+            {message}
+          </p>
         )}
 
-        {dailyData && (
-          <div style={{ width: '500px' }}>
-            <h3>Daily Expenses</h3>
-            <Line
-              data={{
-                labels: dailyData.labels,
-                datasets: [{
-                  label: 'Daily Spending',
-                  data: dailyData.amounts,
-                  fill: false,
-                  borderColor: 'rgb(75, 192, 192)',
-                  tension: 0.3
-                }]
-              }}
+        {/* Add Expense */}
+        <div className="exp-card">
+          <h3>Add Expense Manually</h3>
+          <form onSubmit={handleExpenseSubmit} className="exp-form">
+            <input
+              className="exp-input"
+              name="description"
+              placeholder="Description"
+              value={formData.description}
+              onChange={handleInputChange}
+              required
             />
-          </div>
-        )}
+            <input
+              className="exp-input"
+              name="amount"
+              type="number"
+              inputMode="decimal"
+              step="0.01"
+              placeholder="Amount"
+              value={formData.amount}
+              onChange={handleInputChange}
+              required
+            />
+            <input
+              className="exp-input"
+              name="category"
+              placeholder="Category"
+              value={formData.category}
+              onChange={handleInputChange}
+              required
+            />
+            <input
+              className="exp-input"
+              name="date"
+              type="date"
+              value={formData.date}
+              onChange={handleInputChange}
+              required
+            />
+            <button type="submit" className="exp-btn">
+              Add
+            </button>
+          </form>
+        </div>
+
+        {/* CSV Upload */}
+        <div className="exp-card">
+          <h3>Upload CSV</h3>
+          <form onSubmit={handleCsvUpload} className="exp-form">
+            <input
+              type="file"
+              accept=".csv"
+              onChange={(e) => setFile(e.target.files?.[0] || null)}
+              className="exp-file"
+            />
+            <button type="submit" className="exp-btn">
+              Upload
+            </button>
+          </form>
+        </div>
+
+        {/* Charts */}
+        <div className="exp-charts">
+          {categoryData && (
+            <div className="chart-card pie">
+              <h3>Expenses by Category</h3>
+              <Pie
+                data={{
+                  labels: categoryData.labels,
+                  datasets: [
+                    {
+                      data: categoryData.amounts,
+                      backgroundColor: [
+                        "#FF6384",
+                        "#36A2EB",
+                        "#FFCE56",
+                        "#A1DE93",
+                        "#FFB6C1",
+                        "#8A2BE2",
+                      ],
+                    },
+                  ],
+                }}
+                options={{ maintainAspectRatio: false }}
+              />
+            </div>
+          )}
+
+          {dailyData && (
+            <div className="chart-card line">
+              <h3>Daily Expenses</h3>
+              <Line
+                data={{
+                  labels: dailyData.labels,
+                  datasets: [
+                    {
+                      label: "Daily Spending",
+                      data: dailyData.amounts,
+                      fill: false,
+                      borderColor: "rgb(75, 192, 192)",
+                      tension: 0.3,
+                    },
+                  ],
+                }}
+                options={{ maintainAspectRatio: false }}
+              />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

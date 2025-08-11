@@ -1,3 +1,4 @@
+//login.jsx
 import React, { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import "./login.css";
@@ -12,17 +13,25 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("/login", {
+      const response = await fetch("http://localhost:5000/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include", // send cookie
+        credentials: "include", // needed for session cookie
         body: JSON.stringify({ name: username, password }),
       });
-      const data = await response.json();
+  
+      // Safely try to read JSON (405/HTML would crash otherwise)
+      let data = {};
+      try {
+        data = await response.json();
+      } catch (_) {}
+  
       if (response.ok) {
+        // logged in! c
+        console.log("Logged in"+response.credentials);
         navigate("/");
       } else {
-        alert(data.message || "Login failed");
+        alert((data && data.message) || `Login failed (status ${response.status})`);
       }
     } catch (err) {
       console.error("Error during login:", err);
