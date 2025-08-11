@@ -13,7 +13,6 @@
   position: relative; /* for absolute positioning of footer */
   font-family: "Arial", sans-serif;
   overflow: hidden; /* prevent scrolling */
-
 }
 
 .login-header {
@@ -26,7 +25,8 @@
 
 .login-tabs {
   display: flex;
-  margin-bottom: 32px;
+  margin-bottom: 0;
+  /* justify-content: center; */
 }
 
 .tab {
@@ -60,6 +60,8 @@
   flex-direction: column;
   align-items: center;
   min-width: 340px;
+  margin-top: 0;
+  padding-top: 0;
 }
 
 .input-group {

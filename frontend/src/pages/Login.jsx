@@ -42,7 +42,7 @@ const Login = () => {
       <div className="login-card">
         <form onSubmit={handleSubmit}>
           <div className="input-group">
-            <label htmlFor="username">Email Address</label>
+            <label htmlFor="username">User Name</label>
             <input
               type="text"
               id="username"
