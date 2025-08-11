@@ -252,3 +252,35 @@ def create_thread():
         'content': body,
         'timestamp': timestamp.isoformat()
     }), 201
+
+@main_bp.route('/threads/<int:thread_id>', methods=['GET'])
+def get_thread_with_comments(thread_id):
+    thread = Thread.query.get_or_4004(thread_id)
+    comments = Comment.query.filter_by(threadID=thread_id).order_by(Comment.timestamp.asc()).all()
+
+    return jsonify({
+        "thread": {
+            "threadID": thread.threadID, 
+            "title": thread.title,
+            "content": thread.content,
+            "userID": thread.userID,
+            "timestamp": thread.timestamp.isoformat()
+        
+        },
+        "comments": [
+            {
+             "commentID": c.commentID,
+             "userID": c.userID,
+             "content": c.content,
+            "timestamp": c.timestamp.isoformat()
+
+            } for c in comments
+        ]
+
+    })
+
+
+
+
+
+

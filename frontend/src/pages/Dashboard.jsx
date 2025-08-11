@@ -6,6 +6,20 @@ import { useState } from "react";
 // ⬇️ import your component
 import MonthlyExpense from "./MonthlyExpense";
 import Expenses from "./Expenses";
+import { Link } from "react-router-dom";
+
+const Dashboard = () => (
+  <div className="dashboard-container">
+    {/* <header className="home-header dashboard-header">
+      <div className="left-section">
+        <img src={logo} alt="SmartBudget Logo" className="logo" />
+        <span className="slogan">Your Money, Organized.</span>
+      </div>
+      <div className="auth-links">
+        <Link to="/signup" className="btn btn-signup">Sign up</Link>
+        <Link to="/login" className="btn btn-login">Log in</Link>
+      </div>
+    </header> */}
 
 const Dashboard = () => {
   const location = useLocation();

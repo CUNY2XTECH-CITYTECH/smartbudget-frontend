@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import './Forums.css';
 import ThreadCard from './ThreadCard.jsx';
+import Footer from "../components/Footer"; 
 
 function Forums() {
   const [threads, setThreads] = useState([]);
@@ -69,8 +70,7 @@ function Forums() {
       });
       
   };
-
-  return (
+ return (
     <div className="main-layout">
       <div className="sidebar-placeholder">{/* nav */}</div>
       <div className="forums-container">
@@ -85,7 +85,7 @@ function Forums() {
         <h2 className="forums-header">Community Threads</h2>
         <div className="thread-list">
           {filteredThreads.map(thread => (
-            <ThreadCard key={thread.id} {...thread} />
+            <ThreadCard key={thread.id} thread={thread} />
           ))}
         </div>
         <button className="floating-plus" onClick={() => setShowForm(true)}>
@@ -120,8 +120,9 @@ function Forums() {
               </div>
             </form>
           </div>
-        )}
-      </div>
+        )} 
+        <Footer />
+         </div>
     </div>
   );
 }

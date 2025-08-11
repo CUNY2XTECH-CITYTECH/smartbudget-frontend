@@ -2,7 +2,9 @@ import "./Stocks.css";
 
 import { useState } from 'react';
 import { Line } from 'react-chartjs-2';
-
+import Header from "../components/Header";
+import Footer from "../components/Footer";
+import "./Stocks.css";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -77,9 +79,12 @@ function Stocks() {
   };
 
   return (
+    <div>
+      < Header />
     <div className="stocks-page">
       <h2>Stock Market Viewer</h2>
 
+      <div className='form-wrapper'>
       <form onSubmit={handleSubmit}>
         <input
           name="ticker"
@@ -102,6 +107,7 @@ function Stocks() {
         </select>
         <button type="submit">Get Stock Data</button>
       </form>
+      </div>
 
       {error && <p style={{ color: 'red' }}>Error: {error}</p>}
 
@@ -122,6 +128,8 @@ function Stocks() {
           )}
         </>
       )}
+    </div>
+    <Footer />
     </div>
   );
 }
