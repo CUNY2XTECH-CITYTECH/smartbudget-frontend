@@ -1,0 +1,29 @@
+description,amount,category,date
+Salary,3200,Income,2025-01-01
+Rent,1200,Housing,2025-01-01
+Groceries,180,Food,2025-01-03
+Electric Bill,100,Utilities,2025-01-05
+Internet,60,Utilities,2025-01-06
+Coffee,15,Food,2025-01-07
+Gym Membership,45,Health,2025-01-08
+Bus Fare,30,Transportation,2025-01-10
+Dining Out,70,Food,2025-01-12
+Gas,90,Transportation,2025-01-14
+Freelance Work,400,Income,2025-01-15
+Movie Tickets,25,Entertainment,2025-01-16
+Groceries,160,Food,2025-02-02
+Dining Out,80,Food,2025-02-05
+Rent,1200,Housing,2025-02-01
+Coffee,10,Food,2025-02-07
+Internet,60,Utilities,2025-02-08
+Gym Membership,45,Health,2025-02-08
+Gas,95,Transportation,2025-02-10
+Car Repair,300,Transportation,2025-02-15
+Salary,3200,Income,2025-03-01
+Rent,1200,Housing,2025-03-01
+Groceries,200,Food,2025-03-03
+Electric Bill,110,Utilities,2025-03-05
+Dining Out,90,Food,2025-03-07
+Netflix,15,Entertainment,2025-03-08
+Bus Fare,35,Transportation,2025-03-09
+Freelance Work,600,Income,2025-03-10

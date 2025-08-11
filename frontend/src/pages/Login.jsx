@@ -1,3 +1,7 @@
+//login.jsx
+import React, { useState } from "react";
+import { useNavigate, Link, useLocation } from "react-router-dom";
+import "./login.css";
 
 import { useState } from "react";
 import "./Login.css";
@@ -12,8 +16,31 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Replace this with your login logic
-    alert(`Username: ${username}\nPassword: ${password}`);
+    try {
+      const response = await fetch("http://localhost:5000/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include", // needed for session cookie
+        body: JSON.stringify({ name: username, password }),
+      });
+  
+      // Safely try to read JSON (405/HTML would crash otherwise)
+      let data = {};
+      try {
+        data = await response.json();
+      } catch (_) {}
+  
+      if (response.ok) {
+        // logged in! c
+        console.log("Logged in"+response.credentials);
+        navigate("/");
+      } else {
+        alert((data && data.message) || `Login failed (status ${response.status})`);
+      }
+    } catch (err) {
+      console.error("Error during login:", err);
+      alert("Something went wrong.");
+    }
   };
 
   return (
