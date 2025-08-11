@@ -13,7 +13,7 @@ const Login = () => {
   const { search } = useLocation();
   const justSignedUp = new URLSearchParams(search).get("new") === "1";
 
-  const handleSubmit =  async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const response = await fetch("http://localhost:5000/api/login", {
