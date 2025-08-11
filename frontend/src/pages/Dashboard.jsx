@@ -1,5 +1,5 @@
 import "./dashboard.css";
-import logo from "./logo.png";
+import logo from "./logo.png"
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 
