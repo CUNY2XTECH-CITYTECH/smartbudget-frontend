@@ -1,3 +1,5 @@
+
+#routes.py
 from flask import Blueprint, request, jsonify, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from .models import User, Expense, Transaction, Budget, Stock, Thread, Comment
@@ -7,6 +9,7 @@ import pandas as pd
 from collections import defaultdict
 import os
 from flask import send_from_directory
+import yfinance as yf
 
 main_bp = Blueprint('main', __name__)
 
@@ -151,7 +154,7 @@ def daily_totals():
 
 #------stocks------
 
-@main_bp.route('/api/query', methods=['POST'])
+@main_bp.route('/query', methods=['POST'])
 def query_yfinance():
     try:
         data = request.get_json()
@@ -212,7 +215,7 @@ def query_yfinance():
         print("Error in /api/query:", e)
         return jsonify({'error': str(e)}), 500
 
-@main_bp.route('/api/threads', methods=['GET'])
+@main_bp.route('/threads', methods=['GET'])
 def get_threads():
     threads = Thread.query.order_by(Thread.timestamp.desc()).all()
     return jsonify([
@@ -223,32 +226,30 @@ def get_threads():
             'userID': t.userID,
             'timestamp': t.timestamp.isoformat()
         } for t in threads
-    ])
+    ]), 200
 
-@main_bp.route('/api/threads', methods=['POST'])
+@main_bp.route('/threads', methods=['POST'])
 def create_thread():
-    data = request.get_json()
-    user_id = data.get('userID')
-    title = data.get('title')
-    body = data.get('body')
+    # Require login (session cookie must be present)
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Unauthorized'}), 401
 
-    if not user_id or not title or not body:
+    data = request.get_json() or {}
+    title = data.get('title', '').strip()
+    body  = data.get('body',  '').strip()
+
+    if not title or not body:
         return jsonify({'error': 'Missing required fields'}), 400
 
-    # Insert into DB
-    cur = db_conn.cursor()
-    cur.execute(
-        "INSERT INTO threads (userID, title, content) VALUES (%s, %s, %s) RETURNING threadID, timestamp",
-        (user_id, title, body)
-    )
-    thread_id, timestamp = cur.fetchone()
-    db_conn.commit()
-    cur.close()
+    thread = Thread(userID=user_id, title=title, content=body)
+    db.session.add(thread)
+    db.session.commit()
 
     return jsonify({
-        'threadID': thread_id,
-        'userID': user_id,
-        'title': title,
-        'content': body,
-        'timestamp': timestamp.isoformat()
+        'threadID': thread.threadID,
+        'userID': thread.userID,
+        'title': thread.title,
+        'content': thread.content,
+        'timestamp': thread.timestamp.isoformat()
     }), 201
