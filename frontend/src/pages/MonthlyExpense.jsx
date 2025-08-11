@@ -1,64 +1,4 @@
-// import "./MonthlyExpense.css";
-
-
-// const MonthlyExpense = () => (
-//   <div className="budget-container">
-//     <h1 className="budget-title">Monthly Budget</h1>
-//     <form className="budget-form">
-//       <div className="budget-row">
-//         <label>Date:</label>
-//         <input type="text" className="budget-input" />
-//       </div>
-//       <div className="budget-row">
-//         <label>Income:</label>
-//         <input type="text" className="budget-input" />
-//         <input type="text" className="budget-input" placeholder="Other income / savings" />
-//       </div>
-//     </form>
-//     <table className="budget-table">
-//       <thead>
-//         <tr>
-//           <th>Expenses</th>
-//           <th>Budget</th>
-//           <th>Actual</th>
-//           <th>Difference</th>
-//         </tr>
-//       </thead>
-//       <tbody>
-//         {[
-//           "Household Maintenance",
-//           "Water",
-//           "Gas",
-//           "Wi-Fi",
-//           "Electricity",
-//           "Taxes",
-//           "Groceries",
-//           "Entertainment",
-//         ].map((expense) => (
-//           <tr key={expense}>
-//             <td>
-//               <span className="dot"></span>
-//               {expense}
-//             </td>
-//             <td></td>
-//             <td></td>
-//             <td></td>
-//           </tr>
-//         ))}
-//         <tr className="total-row">
-//           <td>Total Expenses</td>
-//           <td></td>
-//           <td></td>
-//           <td></td>
-//         </tr>
-//       </tbody>
-//     </table>
-//   </div>
-// );
-
-// export default MonthlyExpense;
-
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import "./MonthlyExpense.css";
 
 const expenseList = [
@@ -72,98 +12,168 @@ const expenseList = [
   "Entertainment",
 ];
 
+const sanitizeNum = (v) => {
+  // Allow empty string while typing; otherwise parse float
+  if (v === "") return "";
+  const n = parseFloat(v.replace(/[^0-9.-]/g, ""));
+  return isNaN(n) ? "" : String(n);
+};
+
 const MonthlyExpense = () => {
+  const [date, setDate] = useState("");
+  const [income, setIncome] = useState("");
+  const [otherIncome, setOtherIncome] = useState("");
+
   const [expenses, setExpenses] = useState(
     expenseList.map((name) => ({
       name,
       budget: "",
       actual: "",
-      difference: "",
+      difference: "0",
     }))
   );
 
   const handleChange = (index, field, value) => {
     const updated = [...expenses];
-    updated[index][field] = value;
-    // Optionally auto-calculate difference
+    // sanitize incoming value to keep it numeric or empty
+    const clean = sanitizeNum(value);
+    updated[index][field] = clean;
+
     if (field === "budget" || field === "actual") {
       const budget = parseFloat(updated[index].budget) || 0;
       const actual = parseFloat(updated[index].actual) || 0;
-      updated[index].difference = (budget - actual).toString();
+      updated[index].difference = String(budget - actual);
     }
     setExpenses(updated);
   };
 
+  const totals = useMemo(() => {
+    const sum = (arr, key) =>
+      arr.reduce((s, e) => s + (parseFloat(e[key]) || 0), 0);
+    const tBudget = sum(expenses, "budget");
+    const tActual = sum(expenses, "actual");
+    const tDiff = tBudget - tActual;
+    return {
+      budget: tBudget,
+      actual: tActual,
+      diff: tDiff,
+    };
+  }, [expenses]);
+
+  const preventWheel = (e) => e.currentTarget.blur();
+
   return (
     <div className="budget-container">
       <h1 className="budget-title">Monthly Budget</h1>
-      <form className="budget-form">
+
+      <form className="budget-form" onSubmit={(e) => e.preventDefault()}>
         <div className="budget-row">
-          <label>Date:</label>
-          <input type="text" className="budget-input" />
+          <label htmlFor="mb-date">Date:</label>
+          <input
+            id="mb-date"
+            type="date"
+            className="budget-input"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+          />
         </div>
+
         <div className="budget-row">
-          <label>Income:</label>
-          <input type="text" className="budget-input" />
-          <input type="text" className="budget-input" placeholder="Other income / savings" />
+          <label htmlFor="mb-income">Income:</label>
+          <input
+            id="mb-income"
+            type="number"
+            inputMode="decimal"
+            step="0.01"
+            min="0"
+            className="budget-input no-arrows"
+            value={income}
+            onChange={(e) => setIncome(sanitizeNum(e.target.value))}
+            onWheel={preventWheel}
+            placeholder="0"
+            aria-label="Monthly income"
+          />
+          <input
+            type="number"
+            inputMode="decimal"
+            step="0.01"
+            min="0"
+            className="budget-input no-arrows"
+            value={otherIncome}
+            onChange={(e) => setOtherIncome(sanitizeNum(e.target.value))}
+            onWheel={preventWheel}
+            placeholder="Other income / savings"
+            aria-label="Other income or savings"
+          />
         </div>
       </form>
-      <table className="budget-table">
+
+      <table className="budget-table" role="table">
         <thead>
           <tr>
-            <th>Expenses</th>
-            <th>Budget</th>
-            <th>Actual</th>
-            <th>Difference</th>
+            <th scope="col">Expenses</th>
+            <th scope="col">Budget</th>
+            <th scope="col">Actual</th>
+            <th scope="col">Difference</th>
           </tr>
         </thead>
         <tbody>
           {expenses.map((expense, idx) => (
             <tr key={expense.name}>
               <td>
-                <span className="dot"></span>
+                <span className="dot" aria-hidden="true"></span>
                 {expense.name}
               </td>
+
               <td>
                 <input
                   type="number"
+                  inputMode="decimal"
+                  step="0.01"
+                  min="0"
                   className="budget-input no-arrows"
                   value={expense.budget}
                   onChange={(e) => handleChange(idx, "budget", e.target.value)}
+                  onWheel={preventWheel}
                   placeholder="0"
+                  aria-label={`${expense.name} budget`}
                 />
               </td>
+
               <td>
                 <input
                   type="number"
+                  inputMode="decimal"
+                  step="0.01"
+                  min="0"
                   className="budget-input no-arrows"
                   value={expense.actual}
                   onChange={(e) => handleChange(idx, "actual", e.target.value)}
+                  onWheel={preventWheel}
                   placeholder="0"
+                  aria-label={`${expense.name} actual`}
                 />
               </td>
+
               <td>
                 <input
                   type="number"
+                  inputMode="decimal"
+                  step="0.01"
                   className="budget-input no-arrows"
                   value={expense.difference}
                   readOnly
-                  placeholder="0"
+                  aria-label={`${expense.name} difference`}
                 />
               </td>
             </tr>
           ))}
+
           <tr className="total-row">
             <td>Total Expenses</td>
-            <td>
-              {expenses.reduce((sum, e) => sum + (parseFloat(e.budget) || 0), 0)}
-            </td>
-            <td>
-              {expenses.reduce((sum, e) => sum + (parseFloat(e.actual) || 0), 0)}
-            </td>
-            <td>
-              {expenses.reduce((sum, e) => sum + (parseFloat(e.difference) || 0), 0)}
-            </td>
+            <td>{totals.budget.toFixed(2)}</td>
+            <td>{totals.actual.toFixed(2)}</td>
+            <td>{totals.diff.toFixed(2)}</td>
           </tr>
         </tbody>
       </table>

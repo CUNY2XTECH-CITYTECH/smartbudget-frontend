@@ -1,96 +1,136 @@
+/* Root container lives INSIDE the dashboard card */
 .budget-container {
-  background: #fbeaf7;
-  padding: 32px 24px;
-  /* max-width: 600px; */
-  margin: 40px auto;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  font-family: 'Arial', sans-serif;
-}
-
-.budget-title {
-  color: #ff4fcf;
-  font-size: 2.5rem;
-  font-weight: bold;
-  text-align: center;
-  margin-bottom: 24px;
-  font-family: 'Montserrat', Arial, sans-serif;
-}
-
-.budget-form {
-  margin-bottom: 24px;
-}
-
-.budget-row {
-  display: flex;
-  align-items: center;
-  margin-bottom: 12px;
-  gap: 12px;
-}
-
-.budget-row label {
-  font-weight: bold;
-  color: #a04fa0;
-  min-width: 60px;
-}
-
-.budget-input {
-  border: none;
-  border-radius: 4px;
-  background: #fff;
-  padding: 6px 12px;
-  font-size: 1rem;
-  width: 180px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-  color: black;
-}
-
-.budget-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: #fff;
-  border-radius: 8px;
-  overflow: hidden;
-  font-size: 1rem;
-}
-
-.budget-table th {
-  background: #ffb6e6;
-  color: #a04fa0;
-  font-weight: bold;
-  padding: 10px 0;
-}
-
-.budget-table td {
-  border-bottom: 1px solid #ffb6e6;
-  padding: 8px 10px;
-  color: #a04fa0;
-}
-
-.dot {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  background: #ff4fcf;
-  border-radius: 50%;
-  margin-right: 8px;
-  vertical-align: middle;
-}
-
-.total-row td {
-  font-weight: bold;
-  background: #ffe6f7;
-  color: #a04fa0;
-}
-
-/* For Chrome, Safari, Edge, Opera */
-.no-arrows::-webkit-outer-spin-button,
-.no-arrows::-webkit-inner-spin-button {
-  -webkit-appearance: none; /* Removes default styling */
-  margin: 0; /* Removes any default margin */
-}
-
-/* For Firefox */
-.no-arrows {
-  -moz-appearance: textfield; /* Removes default styling */
-}
+    max-width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 12px;                 /* tighter */
+    box-sizing: border-box;
+  
+    background: #f8fcff;           /* matches placeholders */
+    border-radius: 12px;
+    box-shadow: none;               /* card already has shadow */
+    overflow: auto;                 /* scroll if content taller than card */
+  
+    font-family: 'Poppins', sans-serif;
+    color: #003049;
+  }
+  
+  /* Title */
+  .budget-title {
+    color: #219ebc;
+    font-size: 1.35rem;            /* smaller */
+    font-weight: 800;
+    text-align: center;
+    margin: 6px 0 10px;
+  }
+  
+  /* Top form row */
+  .budget-form { margin-bottom: 10px; }
+  .budget-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
+  .budget-row label {
+    font-weight: 600;
+    color: #4a5759;
+    min-width: 60px;
+  }
+  
+  /* Inputs (generic) */
+  .budget-input {
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 10px;
+    background: #ffffff;
+    padding: 8px 10px;
+    font-size: 0.92rem;
+    color: #003049;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.06);
+    width: 100%;
+    max-width: 220px;              /* top inputs */
+  }
+  
+  /* Table layout */
+  .budget-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    border-radius: 10px;
+    overflow: hidden;
+    font-size: 0.92rem;
+    table-layout: fixed;           /* enables column widths below */
+    word-break: break-word;
+  }
+  
+  /* Column sizing: 48% for Expenses, three 17% numeric columns */
+  .budget-table th:nth-child(1),
+  .budget-table td:nth-child(1) { width: 48%; text-align: left; padding-left: 14px; }
+  .budget-table th:nth-child(2),
+  .budget-table td:nth-child(2),
+  .budget-table th:nth-child(3),
+  .budget-table td:nth-child(3),
+  .budget-table th:nth-child(4),
+  .budget-table td:nth-child(4) { width: 17%; text-align: center; }
+  
+  /* Header + cells */
+  .budget-table th {
+    background: #d9ecf5;           /* soft blue */
+    color: #003049;
+    font-weight: 700;
+    padding: 8px 6px;              /* smaller */
+  }
+  .budget-table td {
+    border-bottom: 1px solid #e6f1f6;
+    padding: 6px 6px;              /* smaller */
+    color: #003049;
+    vertical-align: middle;
+  }
+  
+  /* Number inputs inside table: shorter + centered */
+  .budget-table .budget-input {
+    max-width: 110px;              /* shrink input width */
+    width: 100%;
+    text-align: center;
+    padding: 6px 8px;
+  }
+  
+  /* Totals row highlight */
+  .total-row td {
+    font-weight: 700;
+    background: #eaf4f8;
+    color: #003049;
+  }
+  
+  /* Dots for category bullet */
+  .dot {
+    display: inline-block;
+    width: 10px; height: 10px;
+    background: #669bbc;           /* brand accent */
+    border-radius: 50%;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+  
+  /* Remove number spinners */
+  .no-arrows::-webkit-outer-spin-button,
+  .no-arrows::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .no-arrows { -moz-appearance: textfield; }
+  
+  /* Responsive tweaks */
+  @media (max-width: 1100px){
+    .budget-table th:nth-child(1),
+    .budget-table td:nth-child(1){ width: 44%; } /* give numeric cols more room */
+    .budget-table th:nth-child(2),
+    .budget-table td:nth-child(2),
+    .budget-table th:nth-child(3),
+    .budget-table td:nth-child(3),
+    .budget-table th:nth-child(4),
+    .budget-table td:nth-child(4){ width: 18.5%; }
+  }
+  @media (max-width: 900px){
+    .budget-title { font-size: 1.2rem; }
+    .budget-table .budget-input { max-width: 96px; }
+  }
+  

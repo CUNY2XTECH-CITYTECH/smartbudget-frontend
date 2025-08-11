@@ -1,79 +1,89 @@
+import "./Signup.css";
 import React, { useState } from "react";
-import "./Signup.css"; // Reusing your existing login styles
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
-const Signup = () => {
+const SignupPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleSignup = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      const response = await fetch("http://localhost:5000/signup", {
+      const response = await fetch("http://localhost:5000/api/signup", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({
-          name: username,
-          password: password,
-        }),
+        body: JSON.stringify({ name: username, password }),
       });
 
-      const data = await response.json();
+      let data = {};
+      try {
+        data = await response.json();
+      } catch (err) {
+        console.error("Failed to parse JSON", err);
+      }
 
       if (response.ok) {
-        alert("Signup successful! Redirecting to login...");
+        alert("Signup successful! You can now log in.");
         navigate("/login");
       } else {
-        alert(data.message || "Signup failed");
+        alert(data.message || "Signup failed.");
       }
     } catch (error) {
       console.error("Signup error:", error);
-      alert("Something went wrong during signup.");
+      alert("An error occurred during signup.");
     }
   };
 
   return (
     <div className="login-container">
-      <h2 className="login-header">Create an Account</h2>
+      {/* No title/header here by request */}
 
-      <div className="login-card">
-        <form onSubmit={handleSignup}>
-          <div className="input-group">
-            <label htmlFor="username">Username</label>
-            <input
-              type="text"
-              id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-            />
+      {/* This wrapper centers the card while keeping footer at the bottom */}
+      <main className="auth-main">
+        <div className="login-card">
+          <h2>Sign Up</h2>
+
+          <form onSubmit={handleSubmit}>
+            <div className="input-group">
+              <label htmlFor="username">Username</label>
+              <input
+                type="text"
+                id="username"
+                name="username"
+                required
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+            </div>
+
+            <div className="input-group">
+              <label htmlFor="password">Password</label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+
+            <button type="submit" className="continue-btn">Sign Up</button>
+          </form>
+
+          <div className="guest-link">
+            <span>
+              Already have an account? <Link to="/login">Log in</Link>
+            </span>
           </div>
+        </div>
+      </main>
 
-          <div className="input-group">
-            <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-
-          <button type="submit" className="continue-btn">
-            Sign Up
-          </button>
-        </form>
-      </div>
-
-      <div className="login-footer">Already have an account? Log in above!</div>
+      <footer className="login-footer">Footer here</footer>
     </div>
   );
 };
 
-export default Signup;
+export default SignupPage;

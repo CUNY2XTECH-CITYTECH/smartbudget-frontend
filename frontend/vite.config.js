@@ -10,11 +10,12 @@ export default defineConfig({
         changeOrigin: true,
         secure: false
       },
-      '/signup': {
-        target: 'http://localhost:5000',
-        changeOrigin: true,
-        secure: false
+      '/server': {
+        proxy: {
+          '/signup': 'http://localhost:5000',
+        }
       },
+      
       '/logout': {
         target: 'http://localhost:5000',
         changeOrigin: true,
