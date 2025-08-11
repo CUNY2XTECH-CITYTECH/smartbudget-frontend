@@ -1,35 +1,37 @@
-import { useState, useEffect } from 'react';
-import './Forums.css';
-import ThreadCard from './ThreadCard.jsx';
+// src/pages/Forums.jsx
+import { useState, useEffect } from "react";
+import "./Forums.css";
+import ThreadCard from "./ThreadCard.jsx";
+import SidebarShell from "../components/SidebarShell.jsx"; // ✅ correct path
 
 function Forums() {
   const [threads, setThreads] = useState([]);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
-  const [newThread, setNewThread] = useState({ title: '', body: '' });
+  const [newThread, setNewThread] = useState({ title: "", body: "" });
 
-  // Fetch threads (include credentials only if your GET requires login)
+  // Fetch threads
   useEffect(() => {
-    fetch('http://localhost:5000/api/threads', { credentials: 'include' })
-      .then(res => {
+    fetch("http://localhost:5000/api/threads", { credentials: "include" })
+      .then((res) => {
         if (!res.ok) throw new Error(`Failed to load threads (${res.status})`);
         return res.json();
       })
-      .then(data =>
+      .then((data) =>
         setThreads(
-          data.map(t => ({
+          data.map((t) => ({
             id: t.threadID,
             title: t.title,
             author: `User ${t.userID}`,
             time: new Date(t.timestamp).toLocaleString(),
-            body: t.content
+            body: t.content,
           }))
         )
       )
-      .catch(err => console.error('Load threads error:', err));
+      .catch((err) => console.error("Load threads error:", err));
   }, []);
 
-  const filteredThreads = threads.filter(thread =>
+  const filteredThreads = threads.filter((thread) =>
     thread.title.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -37,44 +39,43 @@ function Forums() {
     e.preventDefault();
     if (!newThread.title.trim() || !newThread.body.trim()) return;
 
-    fetch('http://localhost:5000/api/threads', 
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',                 // 👈 send session cookie
-        body: JSON.stringify({
-          title: newThread.title,
-          body: newThread.body
-        })
-      }
-    )
-      .then(async res => {
+    fetch("http://localhost:5000/api/threads", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        title: newThread.title,
+        body: newThread.body,
+      }),
+    })
+      .then(async (res) => {
         let payload = {};
-        try { payload = await res.json(); } catch {}
+        try {
+          payload = await res.json();
+        } catch {}
         if (!res.ok) throw new Error(payload.error || `Request failed (${res.status})`);
         return payload;
       })
-      .then(data => {
+      .then((data) => {
         const added = {
           id: data.threadID,
           title: data.title,
           author: `User ${data.userID}`,
           time: new Date(data.timestamp).toLocaleString(),
-          body: data.content
+          body: data.content,
         };
-        setThreads(prev => [added, ...prev]);  // functional update
+        setThreads((prev) => [added, ...prev]);
         setShowForm(false);
-        setNewThread({ title: '', body: '' });
+        setNewThread({ title: "", body: "" });
       })
-      .catch(err => {
-        console.error('Thread creation error:', err);
-        alert(err.message || 'Failed to post thread. Are you logged in?');
+      .catch((err) => {
+        console.error("Thread creation error:", err);
+        alert(err.message || "Failed to post thread. Are you logged in?");
       });
   };
 
   return (
-    <div className="main-layout">
-      <div className="sidebar-placeholder" />
+    <SidebarShell>
       <div className="forums-container">
         <div className="search-bar">
           <input
@@ -88,7 +89,7 @@ function Forums() {
         <h2 className="forums-header">Community Threads</h2>
 
         <div className="thread-list">
-          {filteredThreads.map(thread => (
+          {filteredThreads.map((thread) => (
             <ThreadCard key={thread.id} {...thread} />
           ))}
         </div>
@@ -116,13 +117,15 @@ function Forums() {
               />
               <div className="popup-buttons">
                 <button type="submit">Post</button>
-                <button type="button" onClick={() => setShowForm(false)}>Cancel</button>
+                <button type="button" onClick={() => setShowForm(false)}>
+                  Cancel
+                </button>
               </div>
             </form>
           </div>
         )}
       </div>
-    </div>
+    </SidebarShell>
   );
 }
 
