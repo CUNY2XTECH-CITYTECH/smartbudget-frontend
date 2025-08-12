@@ -16,6 +16,9 @@
   overflow: hidden; /* prevent scrolling */
 
 }
+.contact{
+  color: #80b97d;
+}
 
 .login-header {
   font-weight: bold;
@@ -23,6 +26,9 @@
   margin-bottom: 24px;
   align-self: flex-start;
   margin-left: 32px;
+  position: absolute;
+  top: 10px;
+  left: 20px;
 }
 
 .login-tabs {

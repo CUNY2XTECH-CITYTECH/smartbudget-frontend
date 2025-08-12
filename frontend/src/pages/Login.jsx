@@ -120,7 +120,8 @@ const Login = () => {
           <span>Continue as Guest</span>
           </div>
       </div>
-      <footer className="login-footer">Footer here</footer>
+      <footer className="login-footer">© 2025 SmartBudget. All rights reserved. | 
+        <a className="contact" href="mailto:support@smartbudget.com">Contact Us</a></footer>
     </div>
   );
 };

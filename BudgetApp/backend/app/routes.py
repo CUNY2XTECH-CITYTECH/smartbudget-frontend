@@ -102,6 +102,7 @@ def check_session():
         return jsonify({
             "loggedIn": True,
             "user": session['username']
+            "message":"it working"
         })
     return jsonify({"loggedIn": False}), 200
 

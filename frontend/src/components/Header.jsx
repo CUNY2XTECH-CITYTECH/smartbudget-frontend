@@ -14,6 +14,7 @@ function Header() {
                 if (data.loggedIn) {
                     setLoggedIn(true);
                     setUsername(data.user);
+                    console.log(data.message)
                 } else {
                     setLoggedIn(false);
                     setUsername("");
