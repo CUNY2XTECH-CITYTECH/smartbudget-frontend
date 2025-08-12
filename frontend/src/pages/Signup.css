@@ -38,6 +38,10 @@
   box-sizing: border-box;
 }
 
+.contact{
+  color: #80b97d;
+}
+
 /* Center the card vertically while keeping footer anchored */
 .auth-main{
   flex: 1;               /* take remaining height */

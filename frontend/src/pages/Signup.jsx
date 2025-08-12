@@ -81,7 +81,11 @@ const SignupPage = () => {
         </div>
       </main>
 
-      <footer className="login-footer">Footer here</footer>
+        <footer class = "home-footer">
+            © 2025 SmartBudget. All rights reserved. | 
+            <a  className="contact"
+            href="mailto:support@smartbudget.com">Contact Us</a>
+        </footer>
     </div>
   );
 };
