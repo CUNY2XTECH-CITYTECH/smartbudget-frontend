@@ -149,3 +149,10 @@
 
 
 
+.user-box {
+  display: flex;
+  gap: 1em;
+}
+.user-name{
+  margin-top: 10px;
+}

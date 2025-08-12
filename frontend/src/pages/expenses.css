@@ -58,12 +58,45 @@
   .exp-file{ align-self: center }
   
   /* Charts row */
-  .exp-charts{
-    display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;
+  .exp-charts {
+    display: flex;    
+    justify-content: center;
+    align-items: flex-start;
+    gap: 20px;            /* space between the two boxes */
+    flex-wrap: nowrap;    /* keep them on the same row */
   }
-  .chart-card{ background:#f8fcff; border-radius:var(--radius); box-shadow:var(--shadow); padding:16px; width:100%; max-width:520px }
-  .chart-card h3{ margin:0 0 10px; color:var(--ink); font-weight:700 }
-  .chart-card.pie  canvas{ height: 260px !important }
+  .chart-card{ background:#f8fcff; border-radius:var(--radius); box-shadow:var(--shadow); padding:16px; width:100%; max-width: 520px; }
+  .chart-card h3{ margin:0 0 10px; color:var(--ink); font-weight:700; margin-bottom: 6px; }
+  .chart-card.pie canvas {
+    height: auto !important;
+    width: 100% !important;  /* let it expand with the card */
+    aspect-ratio: 1 / 1;
+    max-height: 550px;       /* keep your size limit */
+    margin: 0 auto;
+    margin-top: 0 !important; 
+  }
+  
+  .chart-card.pie {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  /* square box that controls the chart size */
+.chart-card.pie .pie-wrap {
+  width: min(100%, 380px);   /* adjust 340–420px to taste */
+  aspect-ratio: 1 / 1;       /* perfect square -> perfect circle */
+  position: relative;
+}
+
+/* make the canvas fill that square exactly (no stretch, no blur) */
+.chart-card.pie .pie-wrap canvas {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+}
+  
   .chart-card.line canvas{ height: 300px !important }
   
   /* Responsive tidy */
@@ -76,3 +109,37 @@
     .exp-btn{ width: 100%; }
   }
   
+
+
+
+
+  /* --- PIE CARD: title top-left, chart pulled up --- */
+.chart-card.pie{
+  display: grid;
+  grid-template-rows: auto 1fr;  /* title | chart */
+  align-items: start;            /* keep content at the top */
+}
+
+.chart-card.pie h3{
+  margin: 0;               /* small gap under title */
+  text-align: left;              /* not centered */
+  justify-self: start;           /* top-left corner */
+}
+
+/* If you added the .pie-wrap wrapper from earlier */
+.chart-card.pie .pie-wrap{
+  width: min(100%, 380px);       /* your chosen pie size; adjust if needed */
+  aspect-ratio: 1 / 1;           /* perfect square -> circle pie */
+  position: absolute;
+  margin-top: 19px;                 /* no extra top gap */
+  justify-self: center;          /* center horizontally */
+  align-self: start;             /* sit right under the title */
+}
+
+.chart-card.pie .pie-wrap canvas{
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  margin-top: 0 !important;
+}
