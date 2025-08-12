@@ -11,6 +11,7 @@ import Forums from "./pages/Forums.jsx";
 import Stocks from "./pages/Stocks.jsx";
 import Dashboard from './pages/Dashboard.jsx';
 import Expenses from './pages/Expenses.jsx';
+import Settings from "./pages/Settings.jsx";
 // import NotFound from "./pages/NotFound.jsx";
 
 const router = createBrowserRouter([
@@ -25,6 +26,7 @@ const router = createBrowserRouter([
       { path: 'stocks', element: <Stocks /> },
       { path: 'dashboard', element: <Dashboard /> },
       { path: 'expenses', element: <Expenses /> }, 
+      { path: 'settings', element: <Settings /> },
       // { path: '*', element: <NotFound /> },
     ],
   },

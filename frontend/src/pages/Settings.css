@@ -1,0 +1,135 @@
+/* ===== Theme (uses your app tokens if present) ===== */
+:root{
+    --bg1:#dfeaf1; --bg2:#c6dbe7; --bg3:#8fa7b2; --bg4:#7fb6c9;
+    --ink:#003049; --muted:#4a5759;
+    --btn:#219ebc; --btnHover:#669bbc;
+    --card:#ffffff;               /* dull white base */
+    --glass: rgba(255,255,255,.92);
+    --radius: 20px; --shadow: 0 10px 30px rgba(0,0,0,.12);
+  }
+  
+  /* Subtle ripple like other pages (only when this page is mounted) */
+  @keyframes rippleGradient {
+    0% { background-position: 0% 50%; }
+    25% { background-position: 50% 50%; }
+    50% { background-position: 100% 50%; }
+    75% { background-position: 50% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  body:has(.profile-container){
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(270deg, var(--bg1), var(--bg2), var(--bg3), var(--bg4));
+    background-size: 800% 800%;
+    animation: rippleGradient 20s ease infinite;
+  }
+  
+  /* ===== Dull-white center card ===== */
+  .profile-container{
+    width: min(860px, 92%);
+    margin: 96px auto 56px;              /* clears header & centers vertically-ish */
+    background: var(--glass);
+    border: 1px solid rgba(0,0,0,.06);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 26px 26px 22px;
+    color: var(--ink);
+  }
+  
+  /* Header row inside the card */
+  .profile-header{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(0,0,0,.06);
+    margin-bottom: 18px;
+  }
+  
+  /* Avatar bubble */
+  .profile-avatar{
+    width: 64px; height: 64px; flex: 0 0 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #8ecae6, #669bbc);
+    display: grid; place-items: center;
+    color: #fff; box-shadow: 0 8px 18px rgba(0,0,0,.12);
+  }
+  .avatar-icon{ font-size: 30px; line-height: 1; }
+  
+  /* Title */
+  .profile-title{
+    margin: 0;
+    font-weight: 800;
+    font-size: clamp(1.4rem, 1.1rem + 1vw, 1.9rem);
+  }
+  
+  /* Info sections */
+  .profile-info{
+    display: grid;
+    gap: 16px;
+    margin-bottom: 10px;
+  }
+  .profile-section{
+    display: grid;
+    gap: 6px;
+  }
+  .profile-section label{
+    color: var(--muted);
+    font-weight: 600;
+    font-size: .95rem;
+  }
+  
+  /* Inputs fit the card’s look */
+  .profile-input{
+    background: #fff;
+    border: 1px solid rgba(0,0,0,.08);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: .95rem;
+    outline: none;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,.05);
+  }
+  .profile-input:focus-visible{
+    outline: 3px solid var(--btn);
+    outline-offset: 2px;
+  }
+  
+  /* Buttons centered & consistent */
+  .profile-btn{
+    display: block;                      /* centers with margin auto */
+    width: 240px;                        /* consistent width */
+    margin: 6px auto;                    /* center horizontally */
+    text-align: center;
+  
+    background: var(--btn);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .25s ease, color .25s ease, transform .06s ease;
+  }
+  .profile-btn:hover{ background: var(--btnHover); color: #000; }
+  .profile-btn:active{ transform: translateY(1px); }
+  
+  .profile-btn.logout{
+    background: #6b7280;
+  }
+  .profile-btn.logout:hover{ background:#4b5563; color:#fff; }
+  
+  /* Actions row (buttons already centered) */
+  .profile-actions{
+    padding-top: 8px;
+    border-top: 1px solid rgba(0,0,0,.06);
+    margin-top: 8px;
+  }
+  
+  /* Responsive niceties */
+  @media (max-width: 560px){
+    .profile-container{ padding: 20px; }
+    .profile-btn{ width: 100%; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    body:has(.profile-container){ animation: none; }
+  }
+  
