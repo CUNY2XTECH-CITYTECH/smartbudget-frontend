@@ -116,3 +116,11 @@
   .dashboard-sidebar{width:100%;border-radius:20px;height:auto}
   .sidebar-btn{width:100%}
 }
+
+.user-box {
+  display: flex;
+  gap: 1em;
+}
+.user-name{
+  margin-top: 10px;
+}
