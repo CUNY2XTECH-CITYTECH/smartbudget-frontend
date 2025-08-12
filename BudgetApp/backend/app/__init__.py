@@ -3,10 +3,12 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from datetime import timedelta
 import os
+from dotenv import load_dotenv 
 
 db = SQLAlchemy()
 
 def create_app():
+    load_dotenv()
     app = Flask(__name__, static_folder='../frontend/dist', static_url_path='')
 
     # 🔑 Session secret key
@@ -15,7 +17,12 @@ def create_app():
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'   # or 'None' with HTTPS
     app.config['SESSION_COOKIE_SECURE'] = False     # set True in production
 
+    app.config['FINNHUB_API_KEY'] = os.environ.get('FINNHUB_API_KEY', '')
+
+
+
     # 🗄 Database config — MUST be set before db.init_app(app)
+    app.config['FINNHUB_API_KEY'] = os.environ.get('FINNHUB_API_KEY', 'd2d9o7pr01qjem5jon40d2d9o7pr01qjem5jon4g')
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///budget.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 

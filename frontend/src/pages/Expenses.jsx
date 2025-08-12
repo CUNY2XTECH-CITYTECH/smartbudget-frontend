@@ -1,6 +1,6 @@
 // src/pages/Expenses.jsx
 import React, { useState, useEffect } from "react";
-import "./Expenses.css";                 // adjust if your path differs
+import "./Expenses.css";
 import axios from "axios";
 import { Pie, Line } from "react-chartjs-2";
 import {
@@ -14,7 +14,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import SidebarShell from "../components/SidebarShell.jsx"; // <-- fix path
+import SidebarShell from "../components/SidebarShell.jsx";
 
 ChartJS.register(
   CategoryScale,
@@ -26,6 +26,12 @@ ChartJS.register(
   Tooltip,
   Legend
 );
+
+// ✅ One axios client for this page (points to Flask)
+const api = axios.create({
+  baseURL: "http://localhost:5000/api",
+  withCredentials: true,
+});
 
 export default function Expenses() {
   const [formData, setFormData] = useState({
@@ -43,13 +49,14 @@ export default function Expenses() {
   const fetchCharts = async () => {
     try {
       const [categoryRes, dailyRes] = await Promise.all([
-        axios.get("/expenses/chart-data"),
-        axios.get("/expenses/daily"),
+        api.get("/expenses/chart-data"),
+        api.get("/expenses/daily"),
       ]);
       setCategoryData(categoryRes.data);
       setDailyData(dailyRes.data);
     } catch (err) {
       console.error("Error fetching charts:", err);
+      setMessage("Failed to fetch charts");
     }
   };
 
@@ -65,7 +72,7 @@ export default function Expenses() {
   const handleExpenseSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("/expenses", formData);
+      await api.post("/expenses", formData);
       setFormData({ description: "", amount: "", category: "", date: "" });
       setMessage("Expense added!");
       fetchCharts();
@@ -82,7 +89,9 @@ export default function Expenses() {
     up.append("file", file);
 
     try {
-      await axios.post("/upload", up);
+      await api.post("/upload", up, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       setFile(null);
       setMessage("CSV uploaded successfully!");
       fetchCharts();
@@ -108,7 +117,6 @@ export default function Expenses() {
             </p>
           )}
 
-          {/* Add Expense */}
           <div className="exp-card">
             <h3>Add Expense Manually</h3>
             <form onSubmit={handleExpenseSubmit} className="exp-form">
@@ -151,7 +159,6 @@ export default function Expenses() {
             </form>
           </div>
 
-          {/* CSV Upload */}
           <div className="exp-card">
             <h3>Upload CSV</h3>
             <form onSubmit={handleCsvUpload} className="exp-form">
@@ -165,7 +172,6 @@ export default function Expenses() {
             </form>
           </div>
 
-          {/* Charts */}
           <div className="exp-charts">
             {categoryData && (
               <div className="chart-card pie">
