@@ -283,7 +283,7 @@ html, body {
     width: 100%;
     max-width: 100%;
     margin-top: 28px;               /* sits under the title */
-    padding: 12px;                  /* inner padding for cards */
+    padding-top: 20px;                  /* inner padding for cards */
     box-sizing: border-box;
   
     /* height tuned to viewport; adjust 260px if your header/form changes */
@@ -298,6 +298,7 @@ html, body {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    overflow-y: auto;
   }
   
   /* --- Article cards: keep inside the box --- */
@@ -369,16 +370,9 @@ html, body {
   }
   .news-card h3{ all: unset; }  /* in case any h3 ends up inside later */
   
-  /* 2) Give the scroll area a bit more breathing room at the top */
-  .news-card{
-    padding-top: 16px;         /* was 12px */
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;  /* smooth on trackpads/mobile */
-  }
+  
   
   /* 3) Ensure the first article never sits flush with the rounded edge */
   .news-list{ padding-top: 2px; }
-  .news-item:first-child{ margin-top: 4px; }
-
+  .news-card .news-item:first-child { margin-top: 21950px; }
   
