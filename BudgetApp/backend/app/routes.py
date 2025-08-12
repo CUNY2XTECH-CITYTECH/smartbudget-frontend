@@ -134,7 +134,7 @@ def upload_csv():
                 exp = Expense(
                     description=str(row.get('description') or '').strip(),
                     amount=float(row.get('amount') or 0),
-                    category=str(row.get('category') or '').strip(),
+                    category=str(row.get('category') or '').strip().title(),
                     date=pd.to_datetime(row.get('date')).date(),
                     userID=session['user_id']
                 )
@@ -162,7 +162,7 @@ def add_expense():
     try:
         desc = (data.get('description') or '').strip()
         amount = float(data.get('amount') or 0)
-        category = (data.get('category') or '').strip()
+        category = (data.get('category') or '').strip().title()
         date = pd.to_datetime(data.get('date')).date()
 
         if not desc or not category:

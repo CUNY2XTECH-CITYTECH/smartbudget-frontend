@@ -1,9 +1,9 @@
+// src/pages/Dashboard.jsx
 import "./dashboard.css";
-import logo from "./logo.png"
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import logo from "./logo.png";
+import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 
-// ⬇️ import your component
 import MonthlyExpense from "./MonthlyExpense";
 import Expenses from "./Expenses";
 
@@ -13,31 +13,38 @@ const Dashboard = () => {
   const isActive = (path) => location.pathname === path;
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  // Track login state and username
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [username, setUsername] = useState("");
+  // session state for header (dashboard-only)
+  const [user, setUser] = useState(null);
+  const [checking, setChecking] = useState(true);
 
-  // Check session on mount
   useEffect(() => {
-    fetch("/session", { credentials: "include" })
-      .then(res => res.json())
-      .then(data => {
-        if (data.loggedIn) {
-          setLoggedIn(true);
-          setUsername(data.user);
-        } else {
-          setLoggedIn(false);
-          setUsername("");
-        }
+    let alive = true;
+    fetch("/api/session", { credentials: "include" })
+      .then((r) => (r.ok ? r.json() : Promise.reject(r)))
+      .then((data) => {
+        if (!alive) return;
+        if (data?.loggedIn) setUser({ username: data.user });
+        else setUser(null);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (alive) setChecking(false);
       });
+    return () => {
+      alive = false;
+    };
   }, []);
 
-  // Logout handler
   const handleLogout = async () => {
-    await fetch("/logout", { method: "POST", credentials: "include" });
-    setLoggedIn(false);
-    setUsername("");
-    navigate("/login");
+    try {
+      await fetch("/api/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+      setUser(null);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   return (
@@ -54,16 +61,22 @@ const Dashboard = () => {
           <img src={logo} alt="SmartBudget Logo" className="logo" />
           <span className="slogan">Your Money, Organized.</span>
         </div>
+
         <div className="auth-links">
-          {loggedIn ? (
-            <button className="btn btn-logout" onClick={handleLogout}>
-              Logout {username && <span>({username})</span>}
-            </button>
-          ) : (
-            <>
-              <Link to="/signup" className="btn btn-signup">Sign up</Link>
-              <Link to="/login" className="btn btn-login">Log in</Link>
-            </>
+          {!checking && (
+            user ? (
+              <div className="user-box">
+                <span className="user-name">👤 {user.username}</span>
+                <button className="logout-btn" onClick={handleLogout}>
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <>
+                <Link to="/signup" className="btn btn-signup">Sign up</Link>
+                <Link to="/login" className="btn btn-login">Log in</Link>
+              </>
+            )
           )}
         </div>
       </header>
@@ -77,8 +90,6 @@ const Dashboard = () => {
                 <Link to="/stocks" className={`sidebar-btn ${isActive("/stocks") ? "active" : ""}`}>Stocks</Link>
                 <Link to="/expenses" className={`sidebar-btn ${isActive("/expenses") ? "active" : ""}`}>Calculate Expenses</Link>
                 <Link to="/forums" className={`sidebar-btn ${isActive("/forums") ? "active" : ""}`}>Forums</Link>
-
-
               </div>
 
               <div className="sidebar-settings">
@@ -94,7 +105,6 @@ const Dashboard = () => {
 
           <div className="dashboard-content">
             <div className="content-grid">
-              {/* Main large chart — now renders your component */}
               <div className="card main-chart">
                 <div className="card-inner">
                   <div className="chart-title">Monthly Expenses</div>
@@ -102,7 +112,6 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {/* Top-right pie placeholder */}
               <div className="card pie-chart">
                 <div className="card-inner">
                   <div className="chart-title">Spending Breakdown</div>
@@ -110,7 +119,6 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {/* Bottom-right line placeholder */}
               <div className="card line-chart">
                 <div className="card-inner">
                   <div className="chart-title">Cash Flow Trend</div>

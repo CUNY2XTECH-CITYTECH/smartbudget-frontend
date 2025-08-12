@@ -1,7 +1,6 @@
 // src/pages/Expenses.jsx
 import React, { useState, useEffect } from "react";
 import "./Expenses.css";
-import axios from "axios";
 import { Pie, Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -27,12 +26,6 @@ ChartJS.register(
   Legend
 );
 
-// ✅ One axios client for this page (points to Flask)
-const api = axios.create({
-  baseURL: "http://localhost:5000/api",
-  withCredentials: true,
-});
-
 export default function Expenses() {
   const [formData, setFormData] = useState({
     description: "",
@@ -46,14 +39,37 @@ export default function Expenses() {
   const [dailyData, setDailyData] = useState(null);
   const [message, setMessage] = useState("");
 
+  const pieOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    layout: { padding: 0 },
+    plugins: {
+      legend: {
+        position: "left",
+        align: "center",
+        labels: {
+          boxWidth: 10,
+          boxHeight: 10,
+          padding: 6,
+          usePointStyle: true,
+          pointStyle: "rectRounded",
+          font: { size: 11 },
+        },
+      },
+    },
+    elements: { arc: { borderWidth: 1 } },
+  };
+
   const fetchCharts = async () => {
     try {
-      const [categoryRes, dailyRes] = await Promise.all([
-        api.get("/expenses/chart-data"),
-        api.get("/expenses/daily"),
+      const [catRes, dayRes] = await Promise.all([
+        fetch("/api/expenses/chart-data", { credentials: "include" }),
+        fetch("/api/expenses/daily", { credentials: "include" }),
       ]);
-      setCategoryData(categoryRes.data);
-      setDailyData(dailyRes.data);
+      if (!catRes.ok || !dayRes.ok) throw new Error("chart fetch failed");
+      const [catJson, dayJson] = await Promise.all([catRes.json(), dayRes.json()]);
+      setCategoryData(catJson);
+      setDailyData(dayJson);
     } catch (err) {
       console.error("Error fetching charts:", err);
       setMessage("Failed to fetch charts");
@@ -72,7 +88,13 @@ export default function Expenses() {
   const handleExpenseSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.post("/expenses", formData);
+      const res = await fetch("/api/expenses", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData), // backend casts amount/date
+      });
+      if (!res.ok) throw new Error("add failed");
       setFormData({ description: "", amount: "", category: "", date: "" });
       setMessage("Expense added!");
       fetchCharts();
@@ -87,11 +109,13 @@ export default function Expenses() {
     if (!file) return;
     const up = new FormData();
     up.append("file", file);
-
     try {
-      await api.post("/upload", up, {
-        headers: { "Content-Type": "multipart/form-data" },
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        credentials: "include",
+        body: up, // no headers; browser sets boundary
       });
+      if (!res.ok) throw new Error("upload failed");
       setFile(null);
       setMessage("CSV uploaded successfully!");
       fetchCharts();
@@ -108,11 +132,7 @@ export default function Expenses() {
           <h1 className="expenses-title">📊 Expense Tracker Dashboard</h1>
 
           {message && (
-            <p
-              className={`expenses-msg${
-                message.toLowerCase().includes("fail") ? " error" : ""
-              }`}
-            >
+            <p className={`expenses-msg${message.toLowerCase().includes("fail") ? " error" : ""}`}>
               {message}
             </p>
           )}
@@ -176,25 +196,27 @@ export default function Expenses() {
             {categoryData && (
               <div className="chart-card pie">
                 <h3>Expenses by Category</h3>
-                <Pie
-                  data={{
-                    labels: categoryData.labels,
-                    datasets: [
-                      {
-                        data: categoryData.amounts,
-                        backgroundColor: [
-                          "#FF6384",
-                          "#36A2EB",
-                          "#FFCE56",
-                          "#A1DE93",
-                          "#FFB6C1",
-                          "#8A2BE2",
-                        ],
-                      },
-                    ],
-                  }}
-                  options={{ maintainAspectRatio: false }}
-                />
+                <div className="pie-wrap">
+                  <Pie
+                    data={{
+                      labels: categoryData.labels,
+                      datasets: [
+                        {
+                          data: categoryData.amounts,
+                          backgroundColor: [
+                            "#FF6384",
+                            "#36A2EB",
+                            "#FFCE56",
+                            "#A1DE93",
+                            "#FFB6C1",
+                            "#8A2BE2",
+                          ],
+                        },
+                      ],
+                    }}
+                    options={pieOptions}
+                  />
+                </div>
               </div>
             )}
 

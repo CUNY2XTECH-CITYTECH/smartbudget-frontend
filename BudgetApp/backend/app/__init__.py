@@ -1,41 +1,48 @@
+# app/__init__.py
 from flask import Flask, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from datetime import timedelta
 import os
-from dotenv import load_dotenv 
+from dotenv import load_dotenv
 
 db = SQLAlchemy()
 
 def create_app():
     load_dotenv()
-    app = Flask(__name__, static_folder='../frontend/dist', static_url_path='')
 
-    # 🔑 Session secret key
+    app = Flask(
+        __name__,
+        static_folder='../frontend/dist',   # adjust if your build path differs
+        static_url_path=''
+    )
+
+    # --- Core config (sessions & security) ---
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-please-change-me')
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=4)
-    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'   # or 'None' with HTTPS
-    app.config['SESSION_COOKIE_SECURE'] = False     # set True in production
+    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'    # use 'None' + Secure=True when you move to HTTPS
+    app.config['SESSION_COOKIE_SECURE']  = False
 
+    # --- Third-party API keys (one place only) ---
     app.config['FINNHUB_API_KEY'] = os.environ.get('FINNHUB_API_KEY', '')
 
-
-
-    # 🗄 Database config — MUST be set before db.init_app(app)
-    app.config['FINNHUB_API_KEY'] = os.environ.get('FINNHUB_API_KEY', 'd2d9o7pr01qjem5jon40d2d9o7pr01qjem5jon4g')
+    # --- Database ---
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///budget.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-    # Enable CORS
-    CORS(app, origins=["http://localhost:5173"], supports_credentials=True)
+    # --- CORS ---
+    # Allow credentials for session cookie, restrict to your dev origin
+    CORS(app,
+         origins=["http://localhost:5173"],
+         supports_credentials=True,
+         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+         allow_headers=["Content-Type", "Authorization"])
 
-    # Init DB
+    # Init DB, import models AFTER init
     db.init_app(app)
+    from . import models  # noqa: F401
 
-    # Import models after db is initialized
-    from . import models
-
-    # Register blueprints
+    # Blueprints
     from .routes import main_bp
     app.register_blueprint(main_bp, url_prefix='/api')
 
@@ -43,12 +50,13 @@ def create_app():
     @app.route('/')
     @app.route('/<path:path>')
     def serve_react(path=''):
-        if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
+        # If the file exists inside the built frontend, serve it; otherwise index.html
+        full = os.path.join(app.static_folder, path)
+        if path and os.path.exists(full):
             return send_from_directory(app.static_folder, path)
-        else:
-            return send_from_directory(app.static_folder, 'index.html')
+        return send_from_directory(app.static_folder, 'index.html')
 
-    # Create DB tables if not exist
+    # Create tables once
     with app.app_context():
         db.create_all()
 
