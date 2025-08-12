@@ -1,6 +1,6 @@
 
 #routes.py
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify, session, current_app
 from werkzeug.security import generate_password_hash, check_password_hash
 from .models import User, Expense, Transaction, Budget, Stock, Thread, Comment
 from . import db
@@ -10,7 +10,9 @@ from collections import defaultdict
 import os
 from flask import send_from_directory
 import yfinance as yf
-
+from flask_login import logout_user
+from datetime import date, timedelta
+import requests
 main_bp = Blueprint('main', __name__)
 
 # -------------------- Health Check --------------------
@@ -70,8 +72,28 @@ def login():
 # -------------------- Logout --------------------
 @main_bp.route('/logout', methods=['POST'])
 def logout():
+    # If you were using Flask-Login, you'd call logout_user() too.
     session.clear()
-    return jsonify({"message": "Logged out successfully"}), 200
+    session.modified = True
+
+    resp = jsonify({"message": "Logged out successfully"})
+
+    cookie_name   = current_app.config.get('SESSION_COOKIE_NAME', 'session')
+    cookie_path   = current_app.config.get('SESSION_COOKIE_PATH', '/')
+    cookie_domain = current_app.config.get('SESSION_COOKIE_DOMAIN', None)
+    cookie_samesite = current_app.config.get('SESSION_COOKIE_SAMESITE', None)
+    cookie_secure   = current_app.config.get('SESSION_COOKIE_SECURE', False)
+
+    resp.delete_cookie(
+        cookie_name,
+        path=cookie_path,
+        domain=cookie_domain,
+        samesite=cookie_samesite,
+        secure=cookie_secure,
+    )
+    return resp, 200
+
+
 
 # -------------------- Check Logged In --------------------
 @main_bp.route('/session', methods=['GET'])
@@ -90,40 +112,84 @@ def upload_csv():
         return jsonify({"message": "Unauthorized"}), 401
 
     file = request.files.get('file')
-    if not file or not file.filename.endswith('.csv'):
+    if not file or not file.filename.lower().endswith('.csv'):
         return jsonify({"error": "Invalid file"}), 400
 
-    df = pd.read_csv(file)
-    for _, row in df.iterrows():
-        expense = Expense(
-            description=row.get('description'),
-            amount=float(row.get('amount', 0)),
-            category=row.get('category'),
-            date=pd.to_datetime(row.get('date')).date(),
-        )
-        db.session.add(expense)
+    try:
+        df = pd.read_csv(file)
+        print("CSV columns:", df.columns.tolist())
+        df.columns = [c.strip().lower() for c in df.columns]  # normalize
 
-    db.session.commit()
-    return jsonify({"message": "CSV data uploaded successfully"}), 200
+        required = {'description', 'amount', 'category', 'date'}
+        if not required.issubset(set(df.columns)):
+            return jsonify({
+                "error": "CSV must include columns: description, amount, category, date",
+                "found": df.columns.tolist()
+            }), 400
+
+        added = 0
+        for _, row in df.iterrows():
+            try:
+                exp = Expense(
+                    description=str(row.get('description') or '').strip(),
+                    amount=float(row.get('amount') or 0),
+                    category=str(row.get('category') or '').strip(),
+                    date=pd.to_datetime(row.get('date')).date(),
+                    userID=session['user_id']
+                )
+                db.session.add(exp)
+                added += 1
+            except Exception as row_err:
+                print("Skipping row due to error:", row.to_dict(), row_err)
+
+        db.session.commit()
+        return jsonify({"message": f"CSV uploaded successfully ({added} rows)"}), 200
+    except Exception as e:
+        db.session.rollback()
+        print("CSV upload error:", e)
+        return jsonify({"error": "Failed to parse CSV"}), 400
+    
+
 
 # -------------------- View Expenses --------------------
-@main_bp.route('/expenses', methods=['GET'])
-def view_expenses():
-    expenses = Expense.query.all()
-    return jsonify([
-        {
-            "id": e.id,
-            "description": e.description,
-            "amount": e.amount,
-            "category": e.category,
-            "date": e.date.strftime('%Y-%m-%d')
-        } for e in expenses
-    ])
+@main_bp.route('/expenses', methods=['POST'])
+def add_expense():
+    if 'user_id' not in session:
+        return jsonify({"message": "Unauthorized"}), 401
+
+    data = request.get_json() or {}
+    try:
+        desc = (data.get('description') or '').strip()
+        amount = float(data.get('amount') or 0)
+        category = (data.get('category') or '').strip()
+        date = pd.to_datetime(data.get('date')).date()
+
+        if not desc or not category:
+            return jsonify({"message": "Missing fields"}), 400
+
+        exp = Expense(
+            description=desc,
+            amount=amount,
+            category=category,
+            date=date,
+            userID=session['user_id']  # ✅ tie to logged-in user
+        )
+        db.session.add(exp)
+        db.session.commit()
+        return jsonify({"message": "Added", "id": exp.id}), 201
+    except Exception as e:
+        db.session.rollback()
+        print("Add expense error:", e)
+        return jsonify({"message": "Failed to add expense"}), 400
 
 # -------------------- Chart Data --------------------
 @main_bp.route('/expenses/chart-data', methods=['GET'])
 def chart_data():
-    expenses = Expense.query.all()
+    if 'user_id' not in session:
+        return jsonify({"message": "Unauthorized"}), 401
+
+    expenses = Expense.query.filter_by(userID=session['user_id']).all()
+
     category_totals = defaultdict(float)
     for e in expenses:
         category_totals[e.category] += e.amount
@@ -139,7 +205,14 @@ def chart_data():
 # -------------------- Daily Totals --------------------
 @main_bp.route('/expenses/daily', methods=['GET'])
 def daily_totals():
-    expenses = Expense.query.filter(Expense.category != 'Income').all()
+    if 'user_id' not in session:
+        return jsonify({"message": "Unauthorized"}), 401
+
+    expenses = Expense.query.filter(
+        Expense.userID == session['user_id'],  # ✅ per-user filter
+        Expense.category != 'Income'
+    ).all()
+
     daily_sum = defaultdict(float)
     for e in expenses:
         daily_sum[e.date.strftime('%Y-%m-%d')] += e.amount
@@ -253,3 +326,65 @@ def create_thread():
         'content': thread.content,
         'timestamp': thread.timestamp.isoformat()
     }), 201
+
+@main_bp.route('/delete', methods=['POST'])
+def delete_account():
+    if 'user_id' not in session:
+        return jsonify({"message": "Unauthorized"}), 401
+    user = User.query.get(session['user_id'])
+    if not user:
+        return jsonify({"message": "User not found"}), 404
+    db.session.delete(user)
+    db.session.commit()
+    session.clear()
+    return jsonify({"message": "Account deleted successfully"}), 200
+
+
+@main_bp.route('/news', methods=['GET'])
+def company_news():
+    symbol = (request.args.get('ticker') or '').upper().strip()
+    if not symbol:
+        return jsonify({"error": "ticker is required"}), 400
+
+    api_key = current_app.config.get('FINNHUB_API_KEY')
+    if not api_key:
+        return jsonify({"error": "FINNHUB_API_KEY not configured"}), 500
+
+    # Finnhub requires a from/to window (YYYY-MM-DD). Use last 14 days.
+    today = date.today()
+    frm = (today - timedelta(days=14)).isoformat()
+    to  = today.isoformat()
+
+    try:
+        resp = requests.get(
+            "https://finnhub.io/api/v1/company-news",
+            params={"symbol": symbol, "from": frm, "to": to, "token": api_key},
+            timeout=10
+        )
+        if resp.status_code == 429:
+            return jsonify({"items": [], "note": "Rate limited by Finnhub (429). Try again shortly."}), 200
+        if not resp.ok:
+            # Bubble some detail for debugging
+            return jsonify({"items": [], "error": f"finnhub {resp.status_code}"}), 200
+
+        data = resp.json() or []
+        # Normalize for frontend (headline, url, source, time in ms)
+        items = []
+        for it in data:
+            if not it.get('headline') or not it.get('url'):
+                continue
+            items.append({
+                "headline": it.get("headline"),
+                "url": it.get("url"),
+                "source": it.get("source"),
+                "time": (it.get("datetime") or 0) * 1000  # seconds → ms
+            })
+
+        # Optional: sort newest first
+        items.sort(key=lambda x: x["time"], reverse=True)
+
+        return jsonify({"items": items}), 200
+
+    except requests.RequestException as e:
+        # Network/timeout/etc.
+        return jsonify({"items": [], "error": "request-failed"}), 200
