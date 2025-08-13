@@ -307,7 +307,7 @@ def create_thread():
     # Require login (session cookie must be present)
     user_id = session.get('user_id')
     if not user_id:
-        return jsonify({'error': 'Unauthorized'}), 401
+        return jsonify({'error': 'Unauthorized.'}), 401
 
     data = request.get_json() or {}
     title = data.get('title', '').strip()
@@ -390,6 +390,152 @@ def company_news():
         # Network/timeout/etc.
         return jsonify({"items": [], "error": "request-failed"}), 200
     
+
+@main_bp.route('/monthly', methods=['POST'])
+def save_monthly():
+    """Create or update this user's monthly expense plan"""
+    if 'user_id' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    data = request.get_json() or {}
+    try:
+        year  = int(data.get('year'))
+        month = int(data.get('month'))  # 1-12
+    except (TypeError, ValueError):
+        return jsonify({"error": "Invalid year/month"}), 400
+
+    total_budget = float(data.get('totalBudget') or 0)
+    categories   = data.get('categories') or {}   # expected dict
+    notes        = (data.get('notes') or '').strip()
+
+    from .models import MonthlyExpense
+    plan = MonthlyExpense.query.filter_by(
+        userID=session['user_id'],
+        year=year, month=month
+    ).first()
+
+    if not plan:
+        plan = MonthlyExpense(
+            userID=session['user_id'],
+            year=year, month=month,
+            totalBudget=total_budget,
+            categories=categories,
+            notes=notes
+        )
+        db.session.add(plan)
+    else:
+        plan.totalBudget = total_budget
+        plan.categories  = categories
+        plan.notes       = notes
+
+    db.session.commit()
+    return jsonify({"message": "Saved", "plan": plan.as_dict()}), 201
+
+
+@main_bp.route('/monthly/<int:year>/<int:month>', methods=['GET'])
+def get_monthly(year, month):
+    """Fetch this user's plan for a given month"""
+    if 'user_id' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    from .models import MonthlyExpense
+    plan = MonthlyExpense.query.filter_by(
+        userID=session['user_id'], year=year, month=month
+    ).first()
+    return jsonify({"plan": plan.as_dict() if plan else None}), 200
+
+
+@main_bp.route('/monthly/pie', methods=['GET'])
+def monthly_pie():
+    if 'user_id' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    # ?year=2025&month=8&metric=actual|budget
+    year   = request.args.get('year', type=int)
+    month  = request.args.get('month', type=int)
+    metric = (request.args.get('metric') or 'actual').lower()
+    if metric not in ('actual', 'budget'):
+        metric = 'actual'
+    if not year or not month:
+        return jsonify({"error": "year and month required"}), 400
+
+    from .models import MonthlyExpense
+    plan = MonthlyExpense.query.filter_by(
+        userID=session['user_id'], year=year, month=month
+    ).first()
+
+    if not plan:
+        return jsonify({"labels": [], "amounts": [], "year": year, "month": month, "metric": metric}), 200
+
+    cats = plan.categories or {}
+    labels, amounts = [], []
+    for name, row in cats.items():
+        try:
+            val = float((row or {}).get(metric) or 0)
+        except (TypeError, ValueError):
+            val = 0.0
+        if val > 0:
+            labels.append(name)
+            amounts.append(round(val, 2))
+
+    return jsonify({"labels": labels, "amounts": amounts, "year": year, "month": month, "metric": metric}), 200
+
+
+@main_bp.route('/monthly/pie/latest', methods=['GET'])
+def monthly_pie_latest():
+    if 'user_id' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    from .models import MonthlyExpense
+    plan = (MonthlyExpense.query
+            .filter_by(userID=session['user_id'])
+            .order_by(MonthlyExpense.year.desc(), MonthlyExpense.month.desc())
+            .first())
+
+    if not plan:
+        return jsonify({"labels": [], "amounts": [], "year": None, "month": None, "metric": "actual"}), 200
+
+    cats = plan.categories or {}
+    labels, amounts = [], []
+    for name, row in cats.items():
+        try:
+            val = float((row or {}).get('actual') or 0)
+        except (TypeError, ValueError):
+            val = 0.0
+        if val > 0:
+            labels.append(name)
+            amounts.append(round(val, 2))
+
+    return jsonify({"labels": labels, "amounts": amounts, "year": plan.year, "month": plan.month, "metric": "actual"}), 200
+
+@main_bp.route('/expenses/daily-both', methods=['GET'])
+def daily_both():
+    if 'user_id' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    # Pull all this user's expense rows
+    rows = Expense.query.filter(Expense.userID == session['user_id']).all()
+
+    daily_expense = defaultdict(float)
+    daily_income  = defaultdict(float)
+
+    for e in rows:
+        key = e.date.strftime('%Y-%m-%d')
+        cat = (e.category or "").strip().lower()
+        if cat == 'income':
+            daily_income[key] += float(e.amount or 0)
+        else:
+            daily_expense[key] += float(e.amount or 0)
+
+    all_dates = sorted(set(daily_expense.keys()) | set(daily_income.keys()))
+    expenses_series = [round(daily_expense.get(d, 0.0), 2) for d in all_dates]
+    income_series   = [round(daily_income.get(d, 0.0), 2)  for d in all_dates]
+
+    return jsonify({
+        "labels": all_dates,
+        "expenses": expenses_series,
+        "income": income_series
+    }), 200
     
 # --- AI Chatbot Route ---
 import os

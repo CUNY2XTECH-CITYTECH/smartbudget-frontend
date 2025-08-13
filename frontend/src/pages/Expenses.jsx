@@ -72,7 +72,7 @@ export default function Expenses() {
       setDailyData(dayJson);
     } catch (err) {
       console.error("Error fetching charts:", err);
-      setMessage("Failed to fetch charts");
+      setMessage("Failed to fetch charts. Please Log in!");
     }
   };
 
@@ -121,7 +121,7 @@ export default function Expenses() {
       fetchCharts();
     } catch (err) {
       console.error(err);
-      setMessage("Failed to upload CSV");
+      setMessage("Failed to upload CSV. Please Log in!");
     }
   };
 

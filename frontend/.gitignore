@@ -22,3 +22,27 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtualenvs
+.venv/
+venv/
+
+# Local stuff
+.env
+instance/
+
+# OS/editor
+.DS_Store
+.vscode/
+.idea/
+
+# Frontend (since you have React/Vite)
+node_modules/
+dist/
+build/
