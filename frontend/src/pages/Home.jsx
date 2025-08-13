@@ -2,7 +2,7 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import "./Home.css";
-import Header from "../components/Header";
+import logo from "./logo.png";
 import Footer from "../components/Footer";
 
 function Home() {
@@ -76,7 +76,7 @@ function Home() {
         </div>
       </main>
 
-     <Footer />
+      < Footer />
     </div>
   );
 }

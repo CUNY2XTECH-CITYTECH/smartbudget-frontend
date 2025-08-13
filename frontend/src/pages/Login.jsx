@@ -84,44 +84,11 @@ const Login = () => {
           </div>
         </div>
       </main>
-
-      <header className="login-header">SmartBudget</header>
-      <div className="login-tabs">
-        <button className="tab signup">Sign up</button>
-        <button className="tab login active">Log in</button>
-      </div>
-      <div className="login-card">
-        <form onSubmit={handleSubmit}>
-          <div className="input-group">
-            <label htmlFor="username">Email Address</label>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              required
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-          </div>
-          <div className="input-group">
-            <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-          <button type="submit" className="continue-btn">Login</button>
-        </form>
-        <div className="guest-link">
-          <span>Continue as Guest</span>
-          </div>
-      </div>
-      <footer className="login-footer">© 2025 SmartBudget. All rights reserved. | 
-        <a className="contact" href="mailto:support@smartbudget.com">Contact Us</a></footer>
+       <footer class = "home-footer">
+            © 2025 SmartBudget. All rights reserved. | 
+            <a  className="contact"
+            href="mailto:support@smartbudget.com">Contact Us</a>
+        </footer>
     </div>
   );
 };

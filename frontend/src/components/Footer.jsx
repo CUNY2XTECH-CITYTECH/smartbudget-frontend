@@ -1,6 +1,4 @@
 
-
-
 function Footer() {
     return (
         <footer class = "home-footer">
