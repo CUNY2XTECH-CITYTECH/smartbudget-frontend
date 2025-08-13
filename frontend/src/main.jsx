@@ -29,7 +29,7 @@ const router = createBrowserRouter([
       { path: 'stocks', element: <Stocks /> },
       { path: 'dashboard', element: <Dashboard /> },
       { path: 'expenses', element: <Expenses /> }, 
-      {path: 'profile', element: <Profile />},
+      {path: 'setting', element: <Profile />},
       // { path: '*', element: <NotFound /> },
     ],
   },
