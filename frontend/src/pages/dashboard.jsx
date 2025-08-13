@@ -129,8 +129,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="dashboard-avatar">Avatar</div> 
-
+      <div className="dashboard-avatar">Avatar</div>
     </div>
   );
 };
