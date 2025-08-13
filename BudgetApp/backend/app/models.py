@@ -69,3 +69,30 @@ class Comment(db.Model):
     userID    = db.Column(db.Integer, db.ForeignKey('users.userID',   ondelete='CASCADE'), nullable=False)
     content   = db.Column(db.Text, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class MonthlyExpense(db.Model):
+    __tablename__ = 'monthly_expenses'
+    id       = db.Column(db.Integer, primary_key=True)
+    userID   = db.Column(db.Integer, db.ForeignKey('users.userID'), nullable=False)
+    year     = db.Column(db.Integer, nullable=False)
+    month    = db.Column(db.Integer, nullable=False)  # 1-12
+    # Optional fields: adjust to what your MonthlyExpense form actually collects
+    totalBudget = db.Column(db.Float, default=0.0)
+    categories  = db.Column(db.JSON, default={})      # {"Food": 200, "Rent": 1200, ...}
+    notes       = db.Column(db.String(255))
+
+    __table_args__ = (
+        db.UniqueConstraint('userID', 'year', 'month', name='uq_user_month'),
+    )
+
+    def as_dict(self):
+        return {
+            "id": self.id,
+            "userID": self.userID,
+            "year": self.year,
+            "month": self.month,
+            "totalBudget": self.totalBudget,
+            "categories": self.categories or {},
+            "notes": self.notes or ""
+        }

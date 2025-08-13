@@ -1,18 +1,29 @@
 // src/pages/Forums.jsx
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import "./Forums.css";
 import ThreadCard from "./ThreadCard.jsx";
-import SidebarShell from "../components/SidebarShell.jsx"; // ✅ correct path
+import SidebarShell from "../components/SidebarShell.jsx";
 
 function Forums() {
   const [threads, setThreads] = useState([]);
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [newThread, setNewThread] = useState({ title: "", body: "" });
+  const [banner, setBanner] = useState("");        // <-- for "please log in" message
+  const [loggedIn, setLoggedIn] = useState(false); // <-- session status
+
+  // Check session once
+  useEffect(() => {
+    fetch("/api/session", { credentials: "include" })
+      .then(r => r.ok ? r.json() : Promise.reject(r))
+      .then(d => setLoggedIn(!!d?.loggedIn))
+      .catch(() => setLoggedIn(false));
+  }, []);
 
   // Fetch threads
   useEffect(() => {
-    fetch("http://localhost:5000/api/threads", { credentials: "include" })
+    fetch("/api/threads", { credentials: "include" })
       .then((res) => {
         if (!res.ok) throw new Error(`Failed to load threads (${res.status})`);
         return res.json();
@@ -35,48 +46,81 @@ function Forums() {
     thread.title.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleCreateThread = (e) => {
+  const openForm = async () => {
+    // Gate the form by session; show friendly banner if not logged in
+    const res = await fetch("/api/session", { credentials: "include" });
+    const d = res.ok ? await res.json() : { loggedIn: false };
+    if (!d.loggedIn) {
+      setBanner("Please log in to post a thread.");
+      setShowForm(false);
+      return;
+    }
+    setBanner("");
+    setShowForm(true);
+  };
+
+  const handleCreateThread = async (e) => {
     e.preventDefault();
     if (!newThread.title.trim() || !newThread.body.trim()) return;
 
-    fetch("http://localhost:5000/api/threads", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({
-        title: newThread.title,
-        body: newThread.body,
-      }),
-    })
-      .then(async (res) => {
-        let payload = {};
-        try {
-          payload = await res.json();
-        } catch {}
-        if (!res.ok) throw new Error(payload.error || `Request failed (${res.status})`);
-        return payload;
-      })
-      .then((data) => {
-        const added = {
-          id: data.threadID,
-          title: data.title,
-          author: `User ${data.userID}`,
-          time: new Date(data.timestamp).toLocaleString(),
-          body: data.content,
-        };
-        setThreads((prev) => [added, ...prev]);
-        setShowForm(false);
-        setNewThread({ title: "", body: "" });
-      })
-      .catch((err) => {
-        console.error("Thread creation error:", err);
-        alert(err.message || "Failed to post thread. Are you logged in?");
+    try {
+      const res = await fetch("/api/threads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          title: newThread.title,
+          body: newThread.body,
+        }),
       });
+
+      // Friendly 401 message
+      let payload = {};
+      try { payload = await res.json(); } catch {}
+
+      if (res.status === 401) {
+        setBanner("Please log in to post a thread.");
+        setShowForm(false);
+        return;
+      }
+      if (!res.ok) {
+        throw new Error(payload.error || `Request failed (${res.status})`);
+      }
+
+      const data = payload;
+      const added = {
+        id: data.threadID,
+        title: data.title,
+        author: `User ${data.userID}`,
+        time: new Date(data.timestamp).toLocaleString(),
+        body: data.content,
+      };
+      setThreads((prev) => [added, ...prev]);
+      setShowForm(false);
+      setNewThread({ title: "", body: "" });
+      setBanner(""); // clear any old banner
+    } catch (err) {
+      console.error("Thread creation error:", err);
+      setBanner(err.message || "Failed to post thread.");
+    }
   };
 
   return (
     <SidebarShell>
       <div className="forums-container">
+        {/* Friendly banner */}
+        {banner && (
+          <div className="forum-banner">
+            {banner}{" "}
+            {!loggedIn && (
+              <>
+                <Link to="/login">Log in</Link> or{" "}
+                <Link to="/signup">Sign up</Link>
+              </>
+            )}
+          </div>
+        )}
+
         <div className="search-bar">
           <input
             type="text"
@@ -94,7 +138,7 @@ function Forums() {
           ))}
         </div>
 
-        <button className="floating-plus" onClick={() => setShowForm(true)}>
+        <button className="floating-plus" onClick={openForm}>
           <span className="plus-icon">+</span>
         </button>
 
