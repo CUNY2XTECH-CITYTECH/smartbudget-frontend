@@ -101,7 +101,8 @@ def check_session():
     if 'user_id' in session:
         return jsonify({
             "loggedIn": True,
-            "user": session['username']
+            "user": session['username'],
+            "message":"it working"
         })
     return jsonify({"loggedIn": False}), 200
 
@@ -535,3 +536,68 @@ def daily_both():
         "expenses": expenses_series,
         "income": income_series
     }), 200
+    
+# --- AI Chatbot Route ---
+import os
+from dotenv import load_dotenv
+from openai import OpenAI
+from sqlalchemy import desc
+
+load_dotenv()
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+@main_bp.route("/chat", methods=["POST"])
+def chat():
+    data = request.get_json(silent=True) or {}
+    text = (data.get("text") or "").strip()
+    messages = data.get("messages")
+
+    # Minimal input handling
+    if not messages:
+        if not text:
+            return jsonify({"error": "No input"}), 400
+        messages = [{"role": "user", "content": text}]
+
+    # OPTIONAL: tiny personalization using last 30 days of this user's expenses
+    if "user_id" in session:
+        from collections import defaultdict
+        from datetime import date, timedelta
+
+        cutoff = date.today() - timedelta(days=30)
+        exps = Expense.query.filter(
+            Expense.userID == session["user_id"],
+            Expense.date >= cutoff
+        ).all()
+
+        total = 0.0
+        by_cat = defaultdict(float)
+        for e in exps:
+            if (e.category or "").lower() != "income":
+                total += float(e.amount or 0)
+                by_cat[e.category] += float(e.amount or 0)
+
+        top_cats = sorted(by_cat.items(), key=lambda kv: kv[1], reverse=True)[:3]
+        top_str = ", ".join([f"{k}: ${v:,.0f}" for k, v in top_cats]) or "none"
+
+        system = {
+            "role": "system",
+            "content": (
+                "You are a concise educational finance assistant for a personal budgeting app. "
+                "Use the user's recent spending context if provided. Be specific and practical. "
+                "Avoid legal/tax advice. Currency is USD unless the user says otherwise.\n\n"
+                f"Recent 30d spend (excl. income): ${total:,.0f}. Top categories: {top_str}."
+            ),
+        }
+        messages = [system] + messages
+
+    try:
+        resp = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=messages,
+            temperature=0.3,
+        )
+        reply = resp.choices[0].message.content
+        return jsonify({"reply": reply})
+    except Exception as e:
+        print("Chat error:", e)
+        return jsonify({"error": "Chat failed"}), 500

@@ -148,6 +148,13 @@
     }
   }
   
+    .home-footer {
+    margin-top: auto;
+    background-color: rgba(74,87,89,.85);
+    text-align: center;
+    padding: 10px;
+  }
+  
   
 
   /* Forums.css */

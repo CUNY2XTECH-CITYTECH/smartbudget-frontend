@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import "./Home.css";
 import logo from "./logo.png";
+import Footer from "../components/Footer";
 
 function Home() {
   const [user, setUser] = useState(null);
@@ -75,7 +76,7 @@ function Home() {
         </div>
       </main>
 
-      <footer className="home-footer">Footer here</footer>
+      < Footer />
     </div>
   );
 }

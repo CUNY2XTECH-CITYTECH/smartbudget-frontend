@@ -3,7 +3,11 @@ import React, { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import "./login.css";
 
-function Login() {
+
+import "./Login.css";
+
+
+const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
@@ -80,10 +84,13 @@ function Login() {
           </div>
         </div>
       </main>
-
-      <footer className="login-footer">Footer here</footer>
+       <footer class = "home-footer">
+            © 2025 SmartBudget. All rights reserved. | 
+            <a  className="contact"
+            href="mailto:support@smartbudget.com">Contact Us</a>
+        </footer>
     </div>
   );
-}
+};
 
 export default Login;

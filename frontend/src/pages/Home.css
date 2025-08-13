@@ -113,6 +113,10 @@
   border-top-right-radius:var(--radius);
 }
 
+.contact{
+  color: #80b97d;
+}
+
 /* Ripple animation (unchanged) */
 @keyframes rippleGradient{
   0%{background-position:0% 50%;}

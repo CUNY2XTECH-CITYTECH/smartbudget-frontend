@@ -20,6 +20,10 @@
   100% { background-position: 0% 50%; }
 }
 
+.contact{
+  color: #80b97d;
+}
+
 /* Page container: flex column so footer can sit at bottom */
 .login-container {
   min-height: 100vh;
@@ -36,6 +40,10 @@
   /* no global justify-content here – we center via .auth-main */
   padding: 16px;         /* light page padding */
   box-sizing: border-box;
+}
+
+.contact{
+  color: #80b97d;
 }
 
 /* Center the card vertically while keeping footer anchored */
@@ -138,6 +146,7 @@
   width: 100%;
   max-width: 1100px;   /* matches typical page width feel */
   margin: 0 auto;      /* center the footer bar */
+  transform: translateX(35%);
 }
 
 /* Responsive */

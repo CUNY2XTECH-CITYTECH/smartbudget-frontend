@@ -1,157 +1,148 @@
-/* ----- Theme to match Signup/Home (lighter, dustier ripple) ----- */
-:root{
-  --bg1:#dfeaf1;  /* light powder blue */
-  --bg2:#c6dbe7;  /* dusty sky */
-  --bg3:#8fa7b2;  /* muted steel blue */
-  --bg4:#7fb6c9;  /* soft teal-blue */
-  --ink:#003049; --muted:#4a5759;
-  --btn:#219ebc; --btnHover:#669bbc;
-  --glass: rgba(255,255,255,.90);
-  --radius: 20px;
-  --shadow: 0 10px 30px rgba(0,0,0,.12);
-}
 
-/* Animated ripple */
-@keyframes rippleGradient {
-  0% { background-position: 0% 50%; }
-  25% { background-position: 50% 50%; }
-  50% { background-position: 100% 50%; }
-  75% { background-position: 50% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-/* Page container: same layout as Signup */
+/* Make the container take full screen and center its contents */
 .login-container {
-  min-height: 100vh;
-  width: 100vw;
-  font-family: 'Poppins', sans-serif;
-
-  background: linear-gradient(270deg, var(--bg1), var(--bg2), var(--bg3), var(--bg4));
-  background-size: 800% 800%;
-  animation: rippleGradient 20s ease infinite;
-
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 16px;
-  box-sizing: border-box;
+  justify-content: center; /* this is key for vertical centering */
+  min-height: 100vh; /* take up full viewport height */
+  min-width: 100vw; /* take up full viewport width */
+  background: #faf9f6;
+  padding: 20px;
+  box-sizing: border-box; /* include padding in width/height calculations */
+  overflow: hidden; /* prevent overflow */
+  position: relative; /* for absolute positioning of footer */
+  font-family: "Arial", sans-serif;
+  overflow: hidden; /* prevent scrolling */
+
+}
+.contact{
+  color: #80b97d;
+}
+
+.login-header {
+  font-weight: bold;
+  margin-top: 16px;
+  margin-bottom: 24px;
+  align-self: flex-start;
+  margin-left: 32px;
+  position: absolute;
+  top: 10px;
+  left: 20px;
+}
+
+.contact{
+  color: #80b97d;
 }
 
 /* Center the card; footer sits at the bottom */
 .auth-main{
   flex: 1;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
+  margin-bottom: 32px;
 }
-
-/* Card */
-.login-card{
-  background: var(--glass);
-  backdrop-filter: blur(6px);
-  border-radius: var(--radius);
-  padding: 24px;
-  box-shadow: var(--shadow);
-  width: 100%;
-  max-width: 420px;
-
+.login-tabs {
   display: flex;
-  flex-direction: column;
-  gap: 14px;
-  align-items: stretch;
+  margin-bottom: 32px;
 }
 
-.login-card h2{
-  margin: 0 0 4px;
-  color: var(--ink);
-  font-weight: 800;
-  text-align: center;
-}
-
-/* Optional success notice when coming from signup */
-.notice{
-  background: rgba(33,158,188,.12);
-  color: var(--ink);
-  border-radius: 12px;
-  padding: 10px 12px;
-  font-size: .9rem;
-  text-align: center;
-}
-
-/* Form + inputs */
-.login-card form{
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.login-card input[type="text"],
-.login-card input[type="password"]{
-  background: rgba(255,255,255,.95);
-  border: 1px solid rgba(0,0,0,.08);
-  border-radius: 12px;
-  padding: 12px 14px;
-  font-size: .95rem;
+.tab {
+  padding: 16px 40px;
+  border: none;
+  border-radius: 25px 25px 0 0;
+  font-size: 1.3rem;
+  background: #d9d9d9;
+  color: #222;
+  cursor: pointer;
   outline: none;
-  box-shadow: inset 0 2px 6px rgba(0,0,0,.06);
-}
-.login-card input:focus-visible{
-  outline: 3px solid var(--btn);
-  outline-offset: 2px;
 }
 
-/* Submit button (matches Signup) */
-.login-card button[type="submit"]{
-  background: var(--btn);
+.signup {
+  background: #c7b1d6;
+  color: #4b2a5a;
+  border-right: 2px solid #4b2a5a;
+}
+
+.login.active {
+  background: #d9d9d9;
+  color: #222;
+}
+
+.login-card {
+  background: #f6f1dc;
+  padding: 32px 40px;
+  border-radius: 32px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 340px;
+}
+
+.input-group {
+  color: black;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 24px;
+  width: 100%;
+}
+
+.input-group label {
+  font-family: "Times New Roman", Times, serif;
+  font-size: 1.2rem;
+  margin-bottom: 4px;
+}
+
+.input-group input {
+  border: none;
+  border-bottom: 2px solid #222;
+  background: transparent;
+  font-size: 1.1rem;
+  padding: 8px 0;
+  margin-bottom: 8px;
+  outline: none;
+  color: black;
+}
+
+.continue-btn {
+  background: #4b4783;
   color: #fff;
   border: none;
-  border-radius: 12px;
-  padding: 12px 16px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background .25s ease, color .25s ease, transform .06s ease;
-}
-.login-card button[type="submit"]:hover{
-  background: var(--btnHover);
-  color: #000;
-}
-.login-card button[type="submit"]:active{
-  transform: translateY(1px);
-}
-
-/* Bottom link */
-.switch-auth{
-  text-align: center;
-  font-size: .9rem;
-  color: var(--muted);
-}
-.switch-auth a{
-  color: var(--btn);
-  font-weight: 700;
-  text-decoration: none;
-}
-.switch-auth a:hover{ text-decoration: underline; }
-
-/* Footer bar like Signup/Home */
-.login-footer{
-  background: rgba(74,87,89,.85);
-  color: #f7f7f7;
-  text-align: center;
-  padding: 8px 10px;
-  font-size: .9rem;
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
+  border-radius: 24px;
+  padding: 12px 0;
   width: 100%;
-  max-width: 1100px;
-  margin: 0 auto;
+  font-size: 1.1rem;
+  margin-top: 8px;
+  cursor: pointer;
 }
 
-/* Responsive */
-@media (max-width: 480px){
-  .login-card{ padding: 20px; }
+.guest-link {
+  margin-top: 16px;
+  text-align: center;
+  width: 100%;
+  font-size: 1.1rem;
+  color: #222;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
-@media (prefers-reduced-motion: reduce){
-  .login-container{ animation: none; }
+.login-footer {
+  background: #f7b6b6;
+  color: #222;
+  width: 100%;
+  text-align: left;
+  padding: 12px 32px;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+}
+
+@media (max-width: 600px) {
+  .login-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    background: #faf9f6;
+  }
 }
