@@ -31,6 +31,16 @@
   left: 20px;
 }
 
+.contact{
+  color: #80b97d;
+}
+
+/* Center the card; footer sits at the bottom */
+.auth-main{
+  flex: 1;
+  display: flex;
+  margin-bottom: 32px;
+}
 .login-tabs {
   display: flex;
   margin-bottom: 32px;

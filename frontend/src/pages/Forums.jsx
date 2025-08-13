@@ -2,13 +2,17 @@
 import { useState, useEffect } from "react";
 import "./Forums.css";
 import ThreadCard from "./ThreadCard.jsx";
-import SidebarShell from "../components/SidebarShell.jsx"; // ✅ correct path
+import SidebarShell from "../components/SidebarShell.jsx";
 
 function Forums() {
   const [threads, setThreads] = useState([]);
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [newThread, setNewThread] = useState({ title: "", body: "" });
+  const [selectedThread, setSelectedThread] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [commentText, setCommentText] = useState("");
+  const [user, setUser] = useState(null);
 
   // Fetch threads
   useEffect(() => {
@@ -30,6 +34,28 @@ function Forums() {
       )
       .catch((err) => console.error("Load threads error:", err));
   }, []);
+
+  // Fetch user session
+  useEffect(() => {
+    fetch("/session", { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.loggedIn) setUser({ username: data.user });
+        else setUser(null);
+      });
+  }, []);
+
+  // Fetch comments for selected thread
+  useEffect(() => {
+    if (!selectedThread) return;
+    fetch(
+      `http://localhost:5000/api/threads/${selectedThread.id}/comments`,
+      { credentials: "include" }
+    )
+      .then((res) => res.json())
+      .then((data) => setComments(data))
+      .catch(() => setComments([]));
+  }, [selectedThread]);
 
   const filteredThreads = threads.filter((thread) =>
     thread.title.toLowerCase().includes(search.toLowerCase())
@@ -74,6 +100,28 @@ function Forums() {
       });
   };
 
+  // Handle posting a comment
+  const handlePostComment = async (e) => {
+    e.preventDefault();
+    if (!commentText.trim() || !selectedThread) return;
+    const res = await fetch(
+      `http://localhost:5000/api/threads/${selectedThread.id}/comments`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ text: commentText }),
+      }
+    );
+    if (res.ok) {
+      const newComment = await res.json();
+      setComments((prev) => [...prev, newComment]);
+      setCommentText("");
+    } else {
+      alert("You must be signed in to post.");
+    }
+  };
+
   return (
     <SidebarShell>
       <div className="forums-container">
@@ -90,7 +138,11 @@ function Forums() {
 
         <div className="thread-list">
           {filteredThreads.map((thread) => (
-            <ThreadCard key={thread.id} {...thread} />
+            <ThreadCard
+              key={thread.id}
+              {...thread}
+              onClick={() => setSelectedThread(thread)}
+            />
           ))}
         </div>
 
@@ -122,6 +174,45 @@ function Forums() {
                 </button>
               </div>
             </form>
+          </div>
+        )}
+
+        {/* Conversation sidebar */}
+        {selectedThread && (
+          <div className="conversation-sidebar">
+            <button className="close-x" onClick={() => setSelectedThread(null)} aria-label="Close">&times;</button>
+            <div className="thread-details">
+              <h3>{selectedThread.title}</h3>
+              <p>
+                <strong>{selectedThread.author}</strong> •{" "}
+                {selectedThread.time}
+              </p>
+              <p>{selectedThread.body}</p>
+              <h4>Conversation</h4>
+              <div className="comments-list">
+                {comments.map((c, i) => (
+                  <div key={i} className="comment">
+                    <strong>{c.author}</strong>: {c.text}
+                  </div>
+                ))}
+              </div>
+              {user ? (
+                <form onSubmit={handlePostComment} className="comment-form">
+                  <input
+                    type="text"
+                    placeholder="Add a comment..."
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                    required
+                  />
+                  <button type="submit">Post</button>
+                </form>
+              ) : (
+                <div className="login-to-comment">
+                  <span>Sign in to add to the conversation.</span>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>

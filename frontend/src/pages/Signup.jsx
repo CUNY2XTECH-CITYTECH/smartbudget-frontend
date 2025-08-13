@@ -41,6 +41,7 @@ const SignupPage = () => {
   };
   return (
     <div className="login-container">
+      <main className="auth-main">
       <header className="login-header">SmartBudget</header>
       <div className="login-card">
         <h2>Sign Up</h2>
@@ -73,6 +74,7 @@ const SignupPage = () => {
         </form>
         <div className="guest-link">
           <span>Already have an account? <a href="/login">Log in</a></span>
+        </div>
         </div>
       </main>
 

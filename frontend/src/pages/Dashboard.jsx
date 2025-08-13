@@ -1,7 +1,7 @@
 // src/pages/Dashboard.jsx
 import "./dashboard.css";
 import logo from "./logo.png";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 import MonthlyExpense from "./MonthlyExpense";
