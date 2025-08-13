@@ -340,17 +340,7 @@ def create_thread():
         'timestamp': thread.timestamp.isoformat()
     }), 201
 
-@main_bp.route('/delete', methods=['POST'])
-def delete_account():
-    if 'user_id' not in session:
-        return jsonify({"message": "Unauthorized"}), 401
-    user = User.query.get(session['user_id'])
-    if not user:
-        return jsonify({"message": "User not found"}), 404
-    db.session.delete(user)
-    db.session.commit()
-    session.clear()
-    return jsonify({"message": "Account deleted successfully"}), 200
+
 
 
 @main_bp.route('/news', methods=['GET'])
