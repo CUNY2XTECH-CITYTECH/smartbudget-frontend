@@ -6,15 +6,13 @@ import App from './App.jsx';
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Home from "./pages/Home.jsx";
 import Login from "./pages/Login.jsx";
-import Dashboard from './pages/dashboard.jsx';
 import MonthlyExpense from './pages/MonthlyExpense.jsx';
 import Signup from "./pages/Signup.jsx";
 import Forums from "./pages/Forums.jsx";
 import Stocks from "./pages/Stocks.jsx";
-import Dashboard from './pages/dashboard.jsx';
+import Dashboard from './pages/Dashboard.jsx';
 import Expenses from './pages/Expenses.jsx';
 import Settings from "./pages/Settings.jsx";
-import Expenses from "./pages/Expenses.jsx";
 import Profile from './pages/profile.jsx';
 
 
